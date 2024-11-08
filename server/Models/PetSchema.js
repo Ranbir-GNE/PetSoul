@@ -22,7 +22,7 @@ const PetSchema = new mongoose.Schema(
       type: Number,
       min: 0,
     },
-    owner: {
+    ownerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const healthRecordSchema = new Schema({
-  petId: { type: String, index: true, trim: true },
+  petId: { type: String, index: true, trim: true, ref: "Pet" },
   ownerInformation: {
     name: { type: String, trim: true },
     contactInformation: { type: String, trim: true },

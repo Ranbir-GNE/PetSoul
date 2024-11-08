@@ -3,6 +3,10 @@ const Schema = mongoose.Schema;
 
 const reportSchema = new Schema(
   {
+    petId: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Pet",
+    },
     vitalSigns: {
       temperature: { type: Number },
       heartRate: { type: Number },
