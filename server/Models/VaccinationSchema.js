@@ -6,17 +6,37 @@ const VaccinationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Pet",
     },
-    vaccineName: {
+    vaccinationType: {
       type: String,
-      trim: true,
+      enum: [one - time, annual, bi - annual, tri - annual],
     },
-    date: {
+    vaccinationName: {
+      type: String,
+      enum: [
+        "rabies",
+        "dhpp",
+        "corona",
+        "leptospirosis",
+        "lyme",
+        "bordetella",
+        "giardia",
+        "lymphoma",
+        "feline leukemia",
+        "feline immunodeficiency",
+        "feline distemper",
+        "feline rabies",
+        "feline herpes",
+        "feline calicivirus",
+        "feline chlamydia",
+      ],
+    },
+    vaccinationDate: {
       type: Date,
     },
-    immunity: {
+    VaccinationImmunity: {
       type: Number,
     },
-    nextDueDate: {
+    nextVaccinationDate: {
       type: Date,
     },
     vaccineStatus: {

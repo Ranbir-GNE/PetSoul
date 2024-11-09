@@ -7,11 +7,14 @@ const healthRecordSchema = new Schema({
     name: { type: String, trim: true },
     contactInformation: { type: String, trim: true },
   },
-  reportType: { type: String, trim: true },
+  presentReports: [{
+    type: mongoose.SchemaTypes.ObjectId,
+    ref: "Report"
+  }],
   medicalHistory: {
     allergies: [{ type: String, trim: true }],
     medications: [{ type: String, trim: true }],
-    vaccinations: { type: mongoose.SchemaTypes.ObjectId, ref: "Vaccination" },
+    vaccinations: [{ type: String, ref: "Vaccination" }],
     surgeries: [{ type: String, trim: true }],
     illnesses: [{ type: String, trim: true }],
     behavioralIssues: [{ type: String, trim: true }],
@@ -36,6 +39,6 @@ const healthRecordSchema = new Schema({
   },
 });
 
-healthRecordSchema.index({ petId: 1 });
+healthRecordSchema.index({ petId: 1,vaccinations:1, presentReports:1 });
 
 module.exports = mongoose.model("HealthRecord", healthRecordSchema);

@@ -1,7 +1,7 @@
 const HealthRecordModel = require("../Models/HealthRecordSchema");
 const VaccinationModel = require("../Models/VaccinationSchema");
 
-const addReport = async (req, res) => {
+const addRecord = async (req, res) => {
   try {
     const {
       petId,
@@ -231,7 +231,7 @@ const getVaccinationRecord = async (req, res) => {
 };
 
 module.exports = {
-  addReport,
+  addRecord,
   updateRecord,
   deleteRecord,
   getMedicalHistory,
