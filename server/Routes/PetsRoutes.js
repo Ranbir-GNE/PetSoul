@@ -12,7 +12,7 @@ const {
 const express = require("express");
 const router = express.Router();
 
-router.post("/create", createPet);
+router.post("/", createPet);
 router.put("/:id", updatePet);
 router.delete("/:id", deletePet);
 router.get("/owner", getPetsByOwnerId);

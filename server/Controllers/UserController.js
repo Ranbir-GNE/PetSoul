@@ -21,7 +21,7 @@ const register = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "User not created" });
     }
-    res.status(201).json(user, { message: "User Created" });
+    res.status(201).json({ user, message: "User Created" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -119,9 +119,9 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
-    register,
-    login,
-    getUserById,
-    updateUser,
-    deleteUser,
-}
+  register,
+  login,
+  getUserById,
+  updateUser,
+  deleteUser,
+};

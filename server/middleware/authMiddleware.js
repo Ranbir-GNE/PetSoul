@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
-const authModel = require("../models/authSchema.cjs");
+const UserModel = require("../Models/UserSchema");
+require("dotenv").config();
 
 const authMiddleware = async (req, res, next) => {
   const headers = req.headers;
@@ -13,8 +14,7 @@ const authMiddleware = async (req, res, next) => {
   try {
     const decode = jwt.verify(token, process.env.JWT_KEY);
     req.id = decode.id;
-    const user = await authModel.findById(req.id);
-    console.log(req);
+    const user = await UserModel.findById(req.id);
 
     if (user) {
       next();

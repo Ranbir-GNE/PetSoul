@@ -1,5 +1,5 @@
-const VaccinationModel = require("../Models/VaccinationModel");
-const RecordModel = require("../Models/RecordModel");
+const VaccinationModel = require("../Models/VaccinationSchema");
+const RecordModel = require("../Models/HealthRecordSchema");
 
 const addVaccination = async (req, res) => {
   const {

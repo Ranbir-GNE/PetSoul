@@ -1,9 +1,9 @@
 const HealthRecordModel = require("../Models/HealthRecordSchema");
 const PetModel = require("../Models/PetSchema");
 const ReportModel = require("../Models/ReportSchema");
+const UserModel = require("../Models/UserSchema");
 
 const createPet = async (req, res) => {
-  const id = req.id;
   const { name, breed, species, profilePicture, age, ownerId } = req.body;
   if (!name || !breed || !age || !species || !ownerId) {
     return res.status(400).json({ message: "All fields are required" });
@@ -13,14 +13,14 @@ const createPet = async (req, res) => {
       name,
       breed,
       age,
-      color,
+      species,
       profilePicture,
-      ownerId: id,
+      ownerId,
     });
     if (!pet) {
       return res.status(400).json({ message: "Failed to Add Pet" });
     }
-    res.status(201).json(pet, { message: "Pet Created" });
+    res.status(201).json({ pet, message: "Pet Created" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -134,7 +134,7 @@ const getRecords = async (req, res) => {
 };
 
 const contact = async (req, res) => {
-  const id = req.param.id;
+  const id = req.params.id;
   if (!id) {
     return res.status(400).json({ message: "Pet ID is required" });
   }
@@ -147,7 +147,9 @@ const contact = async (req, res) => {
     if (!owner) {
       return res.status(400).json({ message: "Owner Not Found" });
     }
-    res.status(200).json(owner);
+    res.status(200).json(owner, {
+      message: "Owner Contact Found",
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -1,20 +1,20 @@
-const ReportModel = require("../models/Report");
+const ReportModel = require("../Models/ReportSchema");
 
 const addReport = async (req, res) => {
+  const {
+    petId,
+    reportType,
+    vitalSigns,
+    physicalExamination,
+    laboratoryTests,
+    additionalTests,
+  } = req.body;
+
+  if (!petId) {
+    return res.status(400).json({ message: "Pet ID is required" });
+  }
+  
   try {
-    const {
-      petId,
-      reportType,
-      vitalSigns,
-      physicalExamination,
-      laboratoryTests,
-      additionalTests,
-    } = req.body;
-
-    if (!petId) {
-      return res.status(400).json({ message: "Pet ID is required" });
-    }
-
     const newReport = new ReportModel({
       petId,
       reportType,
