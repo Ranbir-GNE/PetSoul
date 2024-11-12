@@ -16,12 +16,11 @@ const addReport = async (req, res) => {
     return res.status(400).json({ message: "Pet ID is required" });
   }
 
-  const existingPet = await PetModel.findOne({
-    _id: petId,
-  });
+  const existingPet = await PetModel.findOne({ _id: petId });
   if (!existingPet) {
     return res.status(404).json({ message: "Pet not found" });
   }
+
   try {
     const newReport = new ReportModel({
       petId,
@@ -40,6 +39,15 @@ const addReport = async (req, res) => {
         $push: {
           presentReports: savedReport._id,
           "checkupInformation.dateOfCheckup": savedReport.createdAt,
+          "checkupInformation.vitalSigns.temperature": vitalSigns.temperature,
+          "checkupInformation.vitalSigns.heartRate": vitalSigns.heartRate,
+          "checkupInformation.vitalSigns.respiratoryRate":
+            vitalSigns.respiratoryRate,
+          "checkupInformation.vitalSigns.weight": vitalSigns.weight,
+          "checkupInformation.vitalSigns.bodyConditionScore":
+            vitalSigns.bodyConditionScore,
+          "checkupInformation.vitalSigns.hydrationStatus":
+            vitalSigns.hydrationStatus,
         },
       },
       { new: true, runValidators: true }

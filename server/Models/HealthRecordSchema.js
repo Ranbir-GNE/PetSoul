@@ -24,12 +24,13 @@ const healthRecordSchema = new Schema({
   },
   checkupInformation: {
     dateOfCheckup: [{ type: Date }],
-    weight: { type: Number },
-    bodyConditionScore: { type: String, trim: true },
     vitalSigns: {
-      temperature: { type: Number },
-      heartRate: { type: Number },
-      respiratoryRate: { type: Number },
+      temperature: [{ type: Number }],
+      heartRate: [{ type: Number }],
+      respiratoryRate: [{ type: Number }],
+      weight: [{ type: Number }],
+      bodyConditionScore: [{ type: String }],
+      hydrationStatus: [{ type: String }],
     },
     physicalExamFindings: { type: String, trim: true },
     laboratoryResults: { type: String, trim: true },
