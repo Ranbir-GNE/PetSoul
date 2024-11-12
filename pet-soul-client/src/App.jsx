@@ -4,6 +4,11 @@ import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import PetProfilePage from "./pages/PetProfilePage";
 import DiscoverPage from "./pages/DiscoverPage";
+import SignupPage from "./pages/SignupPage";
+import ManagePetsPage from "./pages/ManagePetsPage";
+import AddReportPage from "./pages/AddReportPage";
+import CommunityPage from "./pages/CommunityPage";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -21,7 +26,7 @@ function App() {
           component={AddReportPage}
         />
         <Route path="/discover" component={DiscoverPage} />
-        <Route path="/health-corner" component={HealthCornerPage} />
+        <Route path="/health-corner" component={Dashboard} />
         <Route path="/community" component={CommunityPage} />
       </Switch>
       <Footer />

@@ -158,7 +158,7 @@ const getMedicalHistory = async (req, res) => {
 
     const medicalHistory = await HealthRecordModel.find(
       { petId },
-      { medicalHistory: 1, reportType: 1 }
+      { medicalHistory: 1, reportType: 1, dateOfCheckup: 1 }
     );
 
     res.status(200).json({
@@ -216,6 +216,11 @@ const getVaccinationRecord = async (req, res) => {
       { petId },
       { vaccineName: 1, date: 1, nextDueDate: 1, vaccineStatus: 1 }
     );
+    if (!vaccinationRecord) {
+      return res.status(400).json({
+        message: "No vaccination record found",
+      });
+    }
 
     res.status(200).json({
       message: "Vaccination record retrieved successfully",

@@ -1,4 +1,6 @@
 const ReportModel = require("../Models/ReportSchema");
+const HealthRecordModel = require("../Models/HealthRecordSchema");
+const PetModel = require("../Models/PetSchema");
 
 const addReport = async (req, res) => {
   const {
@@ -13,7 +15,13 @@ const addReport = async (req, res) => {
   if (!petId) {
     return res.status(400).json({ message: "Pet ID is required" });
   }
-  
+
+  const existingPet = await PetModel.findOne({
+    _id: petId,
+  });
+  if (!existingPet) {
+    return res.status(404).json({ message: "Pet not found" });
+  }
   try {
     const newReport = new ReportModel({
       petId,
@@ -25,15 +33,18 @@ const addReport = async (req, res) => {
     });
 
     const savedReport = await newReport.save();
-    const record = await RecordModel.findOneAndUpdate(
+
+    const record = await HealthRecordModel.findOneAndUpdate(
       { petId: petId },
       {
         $push: {
           presentReports: savedReport._id,
+          "checkupInformation.dateOfCheckup": savedReport.createdAt,
         },
       },
       { new: true, runValidators: true }
     );
+
     if (!record) {
       return res
         .status(404)
@@ -90,11 +101,12 @@ const deleteReport = async (req, res) => {
     if (!report) {
       return res.status(404).json({ message: "Could Not Delete Report" });
     }
-    const record = await RecordModel.findOneAndUpdate(
+    const record = await HealthRecordModel.findOneAndUpdate(
       { presentReports: id },
       {
         $pull: {
           presentReports: id,
+          dateOfCheckup,
         },
       },
       { new: true, runValidators: true }
@@ -115,14 +127,18 @@ const viewPetReport = async (req, res) => {
   if (!id) {
     return res.status(400).json({ message: "Pet ID is required" });
   }
+  const existingPet = await PetModel.findOne({
+    _id: id,
+  });
+  if (!existingPet) {
+    return res.status(404).json({ message: "Pet not found" });
+  }
   try {
     const report = await ReportModel.find({ petId: id });
     if (!report) {
       return res.status(404).json({ message: "No Reports Found" });
     }
-    res
-      .status(200)
-      .json(report, { message: "Reports Found for this Pet found" });
+    res.status(200).json({ message: "Reports Found for this Pet", report });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

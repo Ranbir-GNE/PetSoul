@@ -29,6 +29,7 @@ const addVaccination = async (req, res) => {
       vaccinationDate,
       nextVaccinationDate,
       vaccineStatus,
+      vaccinationName,
     });
     const savedVaccination = await newVaccination.save();
     if (!savedVaccination) {
@@ -38,7 +39,7 @@ const addVaccination = async (req, res) => {
       { petId: petId },
       {
         $push: {
-          "medicalHistory.vaccinations": savedVaccination.vaccinationType,
+          "medicalHistory.vaccinations": savedVaccination.vaccinationName,
         },
       },
       { new: true, runValidators: true }
@@ -50,7 +51,7 @@ const addVaccination = async (req, res) => {
     }
     return res
       .status(200)
-      .json({ message: "Vaccination added successfully", record });
+      .json({ message: "Vaccination added successfully", savedVaccination });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -65,7 +66,7 @@ const updateVaccination = async (req, res) => {
   if (!id) {
     return res.status(400).json({ message: "Vaccination ID is required" });
   }
-  const existVaccination = await VaccinationModel.findOne(id);
+  const existVaccination = await VaccinationModel.findOne({ _id: id });
   if (!existVaccination) {
     return res.status(404).json({ message: "No Vaccination Found" });
   }
@@ -91,18 +92,18 @@ const updateVaccination = async (req, res) => {
 };
 
 const viewVaccinations = async (req, res) => {
-  const petId = req.params.petId;
+  const petId = req.params.id;
   if (!petId) {
     return res.status(400).json({ message: "Pet ID is required" });
   }
   try {
     const vaccinations = await VaccinationModel.find({ petId });
-    if (!vaccinations) {
+    if (!vaccinations || vaccinations.length === 0) {
       return res.status(404).json({ message: "No Vaccinations Found" });
     }
     return res
       .status(200)
-      .json(vaccinations, { message: "Vaccinations Found" });
+      .json({ message: "Vaccinations Found", vaccinations });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -118,14 +119,15 @@ const vaccinationStatus = async (req, res) => {
     return res.status(400).json({ message: "Vaccination ID is required" });
   }
   try {
-    const vaccination = await VaccinationModel.findOne(vaccinationId);
+    const vaccination = await VaccinationModel.findOne({ _id: vaccinationId });
     if (!vaccination) {
       return res.status(404).json({ message: "No Vaccination Found" });
     }
+    const newStatus = vaccination.vaccineStatus === 'completed' ? 'pending' : 'completed';
     const status = await VaccinationModel.findOneAndUpdate(
       { _id: vaccinationId },
       {
-        vaccineStatus: !vaccination.vaccineStatus,
+        vaccineStatus: newStatus,
       },
       { new: true, runValidators: true }
     );

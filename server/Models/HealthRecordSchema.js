@@ -7,10 +7,12 @@ const healthRecordSchema = new Schema({
     name: { type: String, trim: true },
     contactInformation: { type: String, trim: true },
   },
-  presentReports: [{
-    type: mongoose.SchemaTypes.ObjectId,
-    ref: "Report"
-  }],
+  presentReports: [
+    {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "Report",
+    },
+  ],
   medicalHistory: {
     allergies: [{ type: String, trim: true }],
     medications: [{ type: String, trim: true }],
@@ -21,7 +23,7 @@ const healthRecordSchema = new Schema({
     dietaryRestrictions: [{ type: String, trim: true }],
   },
   checkupInformation: {
-    dateOfCheckup: { type: Date },
+    dateOfCheckup: [{ type: Date }],
     weight: { type: Number },
     bodyConditionScore: { type: String, trim: true },
     vitalSigns: {
@@ -39,6 +41,11 @@ const healthRecordSchema = new Schema({
   },
 });
 
-healthRecordSchema.index({ petId: 1,vaccinations:1, presentReports:1 });
+healthRecordSchema.index({
+  petId: 1,
+  vaccinations: 1,
+  presentReports: 1,
+  dateOfCheckup: 1,
+});
 
 module.exports = mongoose.model("HealthRecord", healthRecordSchema);

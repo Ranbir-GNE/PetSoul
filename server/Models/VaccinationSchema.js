@@ -8,7 +8,7 @@ const VaccinationSchema = new mongoose.Schema(
     },
     vaccinationType: {
       type: String,
-      enum: ["one - time", "annual", "bi - annual", "tri - annual"],
+      enum: ["one-time", "annual", "bi-annual", "tri-annual"],
     },
     vaccinationName: {
       type: String,

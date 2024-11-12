@@ -15,7 +15,7 @@ router.put("/:id", updateVaccination);
 router.get("/:id", viewVaccinations);
 router.get("/status/:id", vaccinationStatus);
 router.delete("/:id", deleteVaccination);
-router.put("/vaccination/:id", updateNextVaccinationDate);
-router.get("/vaccination/:id", getNextVaccinationDate);
+router.put("/nextVaccination/:id", updateNextVaccinationDate);
+router.get("/nextVaccination/:id", getNextVaccinationDate);
 
 module.exports = router;
