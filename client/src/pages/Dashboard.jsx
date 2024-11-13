@@ -12,7 +12,7 @@ const Dashboard = () => {
       </div>
 
       <div className="flex-1 flex flex-col">
-        <div className="h-1/10 bg-gray-300">
+        <div className="h-16 bg-gray-300">
           <Navbar />
         </div>
 

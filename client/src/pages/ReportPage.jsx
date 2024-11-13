@@ -1,9 +1,11 @@
 import React from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
-import ViewProfile from "../components/profile/ViewProfile";
+import Notifications from "../components/dashboard/Notifications";
+import AddReportForm from "../components/reports/ReportForm";
+import ViewReport from "../components/reports/ViewReports";
 
-const ProfilePage = () => {
+const ReportPage = () => {
   return (
     <div className="flex h-screen">
       <div className="w-1/6 bg-gray-200">
@@ -17,7 +19,11 @@ const ProfilePage = () => {
 
         <div className="flex-1 flex">
           <div className="flex-1 bg-white">
-            <ViewProfile />
+            <ViewReport />
+          </div>
+
+          <div className="w-1/5 bg-gray-200">
+            <Notifications />
           </div>
         </div>
         <div className="bg-gray-800 text-white p-4">Footer</div>
@@ -26,4 +32,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default ReportPage;

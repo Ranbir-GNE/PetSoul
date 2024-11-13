@@ -2,9 +2,9 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import LoadingButton from "../components/dashboard/LoadingButton";
+import LoadingButton from "../dashboard/LoadingButton";
 // import authContext from "../Context/authContext";
-import image from "../assets/cat.jpg";
+import image from "../../assets/pet1.jpg";
 
 const LoginRegister = () => {
   const [isLoading, setIsLoading] = useState();

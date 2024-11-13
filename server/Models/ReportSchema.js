@@ -7,7 +7,7 @@ const reportSchema = new Schema(
       type: mongoose.SchemaTypes.ObjectId,
       ref: "Pet",
     },
-    reportType: { type: String, enum: ["pending", "completed"] },
+    reportType: { type: String, enum: ["regular", "consultation"] },
     vitalSigns: {
       temperature: { type: Number },
       heartRate: { type: Number },
