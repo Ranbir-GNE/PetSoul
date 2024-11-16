@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import LoadingButton from "../dashboard/LoadingButton";
 // import authContext from "../Context/authContext";
 import image from "../../assets/pet1.jpg";
+import { Input } from "../ui/input";
 
 const LoginRegister = () => {
   const [isLoading, setIsLoading] = useState();
@@ -23,7 +24,7 @@ const LoginRegister = () => {
   useEffect(() => {
     const token = localStorage.getItem("key");
     if (token) {
-    //   navigate("/home");
+      //   navigate("/home");
     }
   }, []);
 
@@ -145,7 +146,7 @@ const LoginRegister = () => {
                 <label className="block mb-2 font-semibold text-white">
                   Email
                 </label>
-                <input
+                <Input
                   type="email"
                   name="email"
                   value={loginData.email}
@@ -159,7 +160,7 @@ const LoginRegister = () => {
                 <label className="block mb-2 font-semibold text-white">
                   Password
                 </label>
-                <input
+                <Input
                   type="password"
                   name="password"
                   value={loginData.password}
@@ -183,7 +184,7 @@ const LoginRegister = () => {
                 <label className="block mb-2 font-semibold text-white">
                   Username
                 </label>
-                <input
+                <Input
                   type="text"
                   name="username"
                   value={registerData.username}
@@ -197,7 +198,7 @@ const LoginRegister = () => {
                 <label className="block mb-2 font-semibold text-white">
                   Email
                 </label>
-                <input
+                <Input
                   type="email"
                   name="email"
                   value={registerData.email}
@@ -211,7 +212,7 @@ const LoginRegister = () => {
                 <label className="block mb-2 font-semibold text-white">
                   Password
                 </label>
-                <input
+                <Input
                   type="password"
                   name="password"
                   value={registerData.password}
@@ -225,7 +226,7 @@ const LoginRegister = () => {
                 <label className="block mb-2 font-semibold text-white">
                   Confirm Password
                 </label>
-                <input
+                <Input
                   type="password"
                   name="confirmPassword"
                   value={registerData.confirmPassword}

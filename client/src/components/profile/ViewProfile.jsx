@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import profile from "../../assets/profilePicture.jpg";
+import { Input } from "../ui/input";
 
 const ViewProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -70,7 +71,7 @@ const ViewProfile = () => {
               <label className="block text-sm font-medium text-gray-700 capitalize">
                 {key === "verified" ? "Verified (true/false)" : key}
               </label>
-              <input
+              <Input
                 type={key === "verified" ? "checkbox" : "text"}
                 value={key === "verified" ? undefined : editedProfile[key]}
                 checked={key === "verified" ? editedProfile[key] : undefined}

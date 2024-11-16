@@ -1,6 +1,7 @@
 import React from "react";
 import logo from "../../assets/logo.png";
 import profile from "../../assets/profilePicture.jpg";
+import { Input } from "../ui/input";
 
 const Navbar = () => {
   return (
@@ -9,7 +10,7 @@ const Navbar = () => {
         <img src={logo} alt="logo" className="h-10" />
       </div>
       <div className="flex-grow mx-4">
-        <input
+        <Input
           type="search"
           name="search"
           placeholder="Search..."

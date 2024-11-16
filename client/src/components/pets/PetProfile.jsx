@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import pet1 from "../../assets/pet1.jpg";
+import { Input } from "../ui/input";
 
 const PetProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -79,7 +80,7 @@ const PetProfile = () => {
               <label className="block text-sm font-medium text-gray-700">
                 Name
               </label>
-              <input
+              <Input
                 type="text"
                 value={editingPet.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
@@ -91,7 +92,7 @@ const PetProfile = () => {
               <label className="block text-sm font-medium text-gray-700">
                 Species
               </label>
-              <input
+              <Input
                 type="text"
                 value={editingPet.species}
                 onChange={(e) => handleInputChange("species", e.target.value)}
@@ -103,7 +104,7 @@ const PetProfile = () => {
               <label className="block text-sm font-medium text-gray-700">
                 Breed
               </label>
-              <input
+              <Input
                 type="text"
                 value={editingPet.breed}
                 onChange={(e) => handleInputChange("breed", e.target.value)}
@@ -115,7 +116,7 @@ const PetProfile = () => {
               <label className="block text-sm font-medium text-gray-700">
                 Age
               </label>
-              <input
+              <Input
                 type="number"
                 value={editingPet.age}
                 onChange={(e) => handleInputChange("age", e.target.value)}

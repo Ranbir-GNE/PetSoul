@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Input } from "../ui/input";
 
 const AddReportForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -86,7 +87,7 @@ const AddReportForm = ({ onSubmit }) => {
               <label className="block text-sm text-gray-600 capitalize">
                 {field}
               </label>
-              <input
+              <Input
                 type="text"
                 value={formData.vitalSigns[field]}
                 onChange={(e) =>
@@ -107,7 +108,7 @@ const AddReportForm = ({ onSubmit }) => {
               <label className="block text-sm text-gray-600 capitalize">
                 {field}
               </label>
-              <input
+              <Input
                 type="text"
                 value={formData.physicalExamination[field]}
                 onChange={(e) =>
@@ -128,7 +129,7 @@ const AddReportForm = ({ onSubmit }) => {
               <label className="block text-sm text-gray-600 capitalize">
                 {field}
               </label>
-              <input
+              <Input
                 type="text"
                 value={formData.laboratoryTests[field]}
                 onChange={(e) =>
@@ -149,7 +150,7 @@ const AddReportForm = ({ onSubmit }) => {
               <label className="block text-sm text-gray-600 capitalize">
                 {field}
               </label>
-              <input
+              <Input
                 type="text"
                 value={formData.additionalTests[field]}
                 onChange={(e) =>
