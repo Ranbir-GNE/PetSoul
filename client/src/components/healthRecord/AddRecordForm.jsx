@@ -40,7 +40,6 @@ const AddRecordForm = ({ onSubmit }) => {
 
   const handleChange = (section, field, value, index = null) => {
     if (index !== null) {
-      // For fields that are arrays (like allergies, medications, etc.)
       setFormData((prev) => ({
         ...prev,
         [section]: {
@@ -79,7 +78,7 @@ const AddRecordForm = ({ onSubmit }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 max-w-lg mx-auto p-6 bg-white"
+      className="space-y-6 max-w-screen-lg mx-auto p-6 bg-white"
     >
       <h2 className="text-2xl font-semibold text-center mb-4">
         Add New Health Record

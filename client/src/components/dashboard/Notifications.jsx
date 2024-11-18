@@ -25,9 +25,6 @@ const Notifications = () => {
           <div className="flex-1">
             <p className="font-semibold text-gray-800">Notification Title</p>
           </div>
-          <div className="ml-3">
-            <p className="text-red-500">Cross</p>
-          </div>
         </div>
         {isOpen && (
           <div className="mt-3">

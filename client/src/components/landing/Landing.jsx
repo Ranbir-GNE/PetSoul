@@ -1,11 +1,9 @@
 import React from "react";
-import teamImage from "../../assets/teamImage.png";
 import InfiniteCards from "./InfiniteMovingCards";
-import AppleCarousel from "./AppleCarousel";
 import PetAppHero from "./BackgroundLines";
 import ScrollAnimation from "./ScrollAnimation";
 import OurMission from "./OurMission";
-import { Section } from "lucide-react";
+import PetCarousel from "./PetCarousel";
 
 const Landing = () => {
   return (
@@ -16,7 +14,7 @@ const Landing = () => {
         </section>
 
         <section>
-          <AppleCarousel />
+          <PetCarousel />
         </section>
 
         <section>

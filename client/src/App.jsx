@@ -24,6 +24,7 @@ function App() {
         <Route path="/pets" element={<PetProfilePage />} />
         <Route path="/otp" element={<OtpPage />} />
         <Route path="/record" element={<HealthRecordPage />} />
+        <Route path="*" element={<div>404</div>} />
         {/* <Route path="/signup" element={<SignupPage />} />
         <Route path="/profile/pets/:petId" element={<PetProfilePage />} />
         <Route path="/discover" element={<DiscoverPage />} />

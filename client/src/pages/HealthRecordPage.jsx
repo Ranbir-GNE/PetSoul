@@ -2,29 +2,30 @@ import React from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
 import Notifications from "../components/dashboard/Notifications";
-import ViewRecord from "@/components/reports/ViewReports";
+import Footer from "@/components/dashboard/Footer";
+import AddRecordForm from "@/components/healthRecord/AddRecordForm";
 
 const HealthRecordPage = () => {
   return (
-    <div className="flex h-screen">
-      <div className="w-1/6 bg-gray-200">
-        <Sidebar />
+    <div className="h-screen flex flex-col">
+      <div className="flex-none">
+        <Navbar />
       </div>
 
-      <div className="flex-1 flex flex-col">
-        <div className="h-16 bg-gray-300">
-          <Navbar />
+      <div className="flex flex-1 overflow-hidden">
+        <div className="flex-none w-1/6">
+          <Sidebar />
         </div>
 
-        <div className="flex-1 flex">
-          <div className="flex-1 bg-white">
-            <ViewRecord />
+        <div className="flex-1 grid grid-cols-12">
+          <div className="col-span-10 overflow-y-auto">
+            <AddRecordForm />
+            <Footer />
           </div>
-          <div className="w-1/5 bg-gray-200">
+          <div className="col-span-2">
             <Notifications />
           </div>
         </div>
-        <div className="bg-gray-800 text-white p-4">Footer</div>
       </div>
     </div>
   );
