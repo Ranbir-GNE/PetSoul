@@ -10,7 +10,7 @@ import { Input } from "../ui/input";
 const LoginRegister = () => {
   const [isLoading, setIsLoading] = useState();
   // const authData = useContext(authContext);
-  const [isLogin, setIsLogin] = useState(true); // Toggle between login and register forms
+  const [isLogin, setIsLogin] = useState(true);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({
     username: "",
@@ -43,7 +43,7 @@ const LoginRegister = () => {
 
     try {
       const response = await axios.post(
-        // "https://diary-entry-backend.vercel.app/api/auth/login",
+        "http://localhost:3000/api/users/login",
         {
           email: loginData.email,
           password: loginData.password,
@@ -79,7 +79,7 @@ const LoginRegister = () => {
     }
     try {
       const response = await axios.post(
-        // "https://diary-entry-backend.vercel.app/api/auth/register",
+        "http://localhost:3000/api/users/register",
         {
           username: registerData.username,
           email: registerData.email,

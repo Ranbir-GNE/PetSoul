@@ -1,5 +1,6 @@
 const HealthRecordModel = require("../Models/HealthRecordSchema");
 const VaccinationModel = require("../Models/VaccinationSchema");
+const PetModel = require("../Models/PetSchema");
 
 const addRecord = async (req, res) => {
   try {
@@ -183,6 +184,13 @@ const getCheckupInformation = async (req, res) => {
         message: "petId is required to retrieve checkup information",
       });
     }
+    const petInfo = await PetModel.findById(petId);
+
+    if (!petInfo) {
+      return res.status(400).json({
+        message: "Pet not found",
+      });
+    }
 
     const checkupInformation = await HealthRecordModel.find(
       { petId },
@@ -192,6 +200,7 @@ const getCheckupInformation = async (req, res) => {
     res.status(200).json({
       message: "Checkup information retrieved successfully",
       checkupInformation,
+      petInfo: petInfo.name,
     });
   } catch (error) {
     console.error(error);
@@ -214,7 +223,12 @@ const getVaccinationRecord = async (req, res) => {
 
     const vaccinationRecord = await VaccinationModel.find(
       { petId },
-      { vaccineName: 1, date: 1, nextDueDate: 1, vaccineStatus: 1 }
+      {
+        vaccinationName: 1,
+        vaccinationDate: 1,
+        nextVaccinationDate: 1,
+        vaccineStatus: 1,
+      }
     );
     if (!vaccinationRecord) {
       return res.status(400).json({

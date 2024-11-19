@@ -1,4 +1,3 @@
-const { model } = require("mongoose");
 const {
   createPet,
   updatePet,
@@ -15,7 +14,7 @@ const router = express.Router();
 router.post("/", createPet);
 router.put("/:id", updatePet);
 router.delete("/:id", deletePet);
-router.get("/owner", getPetsByOwnerId);
+router.get("/owner/:id", getPetsByOwnerId);
 router.get("/:id", getPetDetails);
 router.get("/reports/:id", getReports);
 router.get("/records/:id", getRecords);

@@ -8,9 +8,7 @@ const loggerMiddleware = async (req, res, next) => {
 
   res.on("finish", async () => {
     const duration = Date.now() - start;
-    const log = `[${new Date().toISOString()}] ${method} ${url} ${
-      res.statusCode
-    } ${duration}ms`;
+    const log = `[${new Date().toISOString()}] ${method} ${res.statusCode} ${duration}ms`;
     try {
       await fs.appendFile(serverFile, log + "\n");
     } catch (error) {

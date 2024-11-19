@@ -7,31 +7,44 @@ import PetProfilePage from "./pages/PetProfilePage";
 import OtpPage from "./components/auth/OtpPage";
 import HealthRecordPage from "./pages/HealthRecordPage";
 import LandingPage from "./pages/LandingPage";
+import { Toaster } from "sonner";
+import NotFoundPage from "./pages/NotFound";
+import ChartComponent from "./components/dashboard/ChartComponent";
+import userPetContext from "./context/UserPetContext";
+import userContext from "./context/UserContext";
+import { useState } from "react";
 
 function App() {
+  const [userData, setUserData] = useState({});
+  const [pets, setPets] = useState([]);
   return (
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-      }}
-    >
-      <Routes>
-        <Route exact path="/" element={<LandingPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/reports" element={<ReportPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/pets" element={<PetProfilePage />} />
-        <Route path="/otp" element={<OtpPage />} />
-        <Route path="/record" element={<HealthRecordPage />} />
-        <Route path="*" element={<div>404</div>} />
-        {/* <Route path="/signup" element={<SignupPage />} />
-        <Route path="/profile/pets/:petId" element={<PetProfilePage />} />
+    <>
+      <userPetContext.Provider value={{ pets, setPets }}>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+          }}
+        >
+          <Routes>
+            <Route exact path="/" element={<LandingPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/reports" element={<ReportPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/pets" element={<PetProfilePage />} />
+            <Route path="/otp" element={<OtpPage />} />
+            <Route path="/record" element={<HealthRecordPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+            <Route path="/chart" element={<ChartComponent />} />
+            {/* <Route path="/signup" element={<SignupPage />} />
         <Route path="/discover" element={<DiscoverPage />} />
         <Route path="/community" element={<CommunityPage />} /> */}
-      </Routes>
-      {/* <Footer /> */}
-    </BrowserRouter>
+          </Routes>
+          {/* <Footer /> */}
+        </BrowserRouter>
+      </userPetContext.Provider>
+      <Toaster />
+    </>
   );
 }
 

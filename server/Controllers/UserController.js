@@ -42,7 +42,7 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
     const token = jwt.sign({ id: user._id }, process.env.JWT_KEY, {
-      expiresIn: "1h",
+      expiresIn: "23h",
     });
     if (!token) {
       return res.status(400).json({ message: "Token not generated" });
@@ -70,7 +70,7 @@ const getUserById = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const id = req.id;
+  const id = req.params.id;
   if (!id) {
     return res.status(400).json({ message: "User ID is required" });
   }
@@ -79,6 +79,12 @@ const updateUser = async (req, res) => {
   const existUsername = await UserModel.findOne({ username });
   if (existUsername) {
     return res.status(400).json({ message: "This Username is already taken" });
+  }
+  const existPhoneNumber = await UserModel.findOne({ phoneNumber });
+  if (existPhoneNumber) {
+    return res
+      .status(400)
+      .json({ message: "This Phone Number is already taken" });
   }
   try {
     const user = await UserModel.findByIdAndUpdate(
@@ -103,7 +109,7 @@ const updateUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  const id = req.id;
+  const id = req.params.id;
   if (!id) {
     return res.status(400).json({ message: "User ID is required" });
   }
@@ -118,10 +124,28 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getUserFromToken = async (req, res) => {
+  const token = req.params.token;
+  if (!token) {
+    return res.status(401).json({ message: "Token Not Found" });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_KEY);
+    const user = await UserModel.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   register,
   login,
   getUserById,
   updateUser,
   deleteUser,
+  getUserFromToken,
 };

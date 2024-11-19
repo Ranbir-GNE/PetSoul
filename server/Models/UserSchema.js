@@ -30,7 +30,6 @@ const UserSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       trim: true,
-      unique: true,
     },
     password: {
       type: String,

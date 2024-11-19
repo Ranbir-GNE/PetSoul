@@ -41,7 +41,7 @@ const VaccinationSchema = new mongoose.Schema(
     },
     vaccineStatus: {
       type: String,
-      enum: ["pending", "completed"],
+      enum: ["Pending", "Completed"],
     },
   },
   {

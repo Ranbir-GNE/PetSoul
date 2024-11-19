@@ -1,14 +1,15 @@
 import { useState } from "react";
+import axios from "axios";
 import { Input } from "../ui/input";
+import { toast } from "sonner";
 
-const AddRecordForm = ({ onSubmit }) => {
+const AddRecordForm = () => {
   const [formData, setFormData] = useState({
     petId: "",
     ownerInformation: {
       name: "",
       contactInformation: "",
     },
-    presentReports: [],
     medicalHistory: {
       allergies: [""],
       medications: [""],
@@ -19,14 +20,13 @@ const AddRecordForm = ({ onSubmit }) => {
       dietaryRestrictions: [""],
     },
     checkupInformation: {
-      dateOfCheckup: [""],
+      dateOfCheckup: "",
       vitalSigns: {
         temperature: "",
         heartRate: "",
         respiratoryRate: "",
         weight: "",
         bodyConditionScore: "",
-        hydrationStatus: "",
       },
       physicalExamFindings: "",
       laboratoryResults: "",
@@ -70,11 +70,20 @@ const AddRecordForm = ({ onSubmit }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/healthRecords/",
+        formData
+      );
+      toast.success("Health record added successfully!");
+      console.log("Response:", response.data);
+    } catch (error) {
+      console.error("Error adding record:", error);
+      toast.error("Failed to add health record.");
+    }
   };
-
   return (
     <form
       onSubmit={handleSubmit}
@@ -83,6 +92,18 @@ const AddRecordForm = ({ onSubmit }) => {
       <h2 className="text-2xl font-semibold text-center mb-4">
         Add New Health Record
       </h2>
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700">
+          Pet ID
+        </label>
+        <Input
+          type="text"
+          value={formData.petId}
+          onChange={(e) => handleChange("petId", null, e.target.value)}
+          className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+        />
+      </div>
 
       <div className="mb-6">
         <h3 className="text-lg font-semibold">Medical History</h3>
@@ -113,7 +134,6 @@ const AddRecordForm = ({ onSubmit }) => {
         ))}
       </div>
 
-      {/* Checkup Information */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold">Checkup Information</h3>
         <label className="block text-sm font-medium text-gray-700 mt-2">
@@ -121,16 +141,13 @@ const AddRecordForm = ({ onSubmit }) => {
         </label>
         <Input
           type="date"
-          value={formData.checkupInformation.dateOfCheckup[0]}
+          value={formData.checkupInformation.dateOfCheckup}
           onChange={(e) =>
-            handleChange("checkupInformation", "dateOfCheckup", [
-              e.target.value,
-            ])
+            handleChange("checkupInformation", "dateOfCheckup", e.target.value)
           }
           className="w-full mt-1 p-2 border border-gray-300 rounded-md"
         />
 
-        {/* Vital Signs */}
         <div className="grid grid-cols-3 gap-3 mt-4">
           {Object.keys(formData.checkupInformation.vitalSigns).map((field) => (
             <div key={field} className="mt-2">
@@ -154,39 +171,33 @@ const AddRecordForm = ({ onSubmit }) => {
         </div>
       </div>
 
-      {/* Additional Fields */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold">Additional Fields</h3>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Behavioral Notes
-          </label>
-          {formData.additionalFields.behavioralNotes.map((note, index) => (
-            <Input
-              key={index}
-              type="text"
-              value={note}
-              onChange={(e) =>
-                handleChange(
-                  "additionalFields",
-                  "behavioralNotes",
-                  e.target.value,
-                  index
-                )
-              }
-              className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-            />
-          ))}
-          <button
-            type="button"
-            onClick={() =>
-              handleArrayChange("additionalFields", "behavioralNotes", "")
+        {formData.additionalFields.behavioralNotes.map((note, index) => (
+          <Input
+            key={index}
+            type="text"
+            value={note}
+            onChange={(e) =>
+              handleChange(
+                "additionalFields",
+                "behavioralNotes",
+                e.target.value,
+                index
+              )
             }
-            className="text-blue-500 text-sm mt-1"
-          >
-            + Add More
-          </button>
-        </div>
+            className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+          />
+        ))}
+        <button
+          type="button"
+          onClick={() =>
+            handleArrayChange("additionalFields", "behavioralNotes", "")
+          }
+          className="text-blue-500 text-sm mt-1"
+        >
+          + Add More
+        </button>
       </div>
 
       <button
