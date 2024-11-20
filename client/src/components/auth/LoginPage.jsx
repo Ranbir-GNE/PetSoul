@@ -58,7 +58,7 @@ const LoginRegister = () => {
       // authData.setAuth(true);
       toast.success("Login Success");
 
-      navigate("/home");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error during login:", error);
       setErrorMessage(

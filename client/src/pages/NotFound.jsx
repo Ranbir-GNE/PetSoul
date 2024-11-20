@@ -11,7 +11,7 @@ const NotFoundPage = () => {
         Sorry, the page you are looking for doesn’t exist or has been moved.
       </p>
       <a
-        href="/"
+        href="/dashboard"
         className="mt-8 px-6 py-3 bg-indigo-600 text-white rounded-md text-lg shadow hover:bg-indigo-500 focus:outline-none"
       >
         Go Home

@@ -3,9 +3,9 @@ import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
 import Notifications from "../components/dashboard/Notifications";
 import Footer from "@/components/dashboard/Footer";
-import ViewReport from "@/components/reports/ViewReports";
+import Vaccination from "@/components/vaccinations/Vaccinations";
 
-const ReportPage = () => {
+const VaccinationPage = () => {
   return (
     <div className="h-screen flex flex-col">
       <div className="flex-none">
@@ -19,7 +19,7 @@ const ReportPage = () => {
 
         <div className="flex-1 grid grid-cols-12">
           <div className="col-span-10 overflow-y-auto">
-            <ViewReport />
+            <Vaccination />
             <Footer />
           </div>
           <div className="col-span-2">
@@ -31,4 +31,4 @@ const ReportPage = () => {
   );
 };
 
-export default ReportPage;
+export default VaccinationPage;

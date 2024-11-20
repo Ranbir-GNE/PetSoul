@@ -1,191 +1,319 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { FaSearch } from "react-icons/fa";
+import { Button } from "../ui/button";
 
-const ViewRecord = ({ records = [], onEdit, onDelete }) => {
-  const [selectedRecord, setSelectedRecord] = useState(null);
+const ViewRecord = () => {
+  const [userData, setUserData] = useState({});
+  const [pets, setPets] = useState([]);
+  const [selectedRecord, setSelectedRecord] = useState(null); // No record selected initially
 
-  const handleOpenLightbox = (record) => {
-    setSelectedRecord(record);
+  // Fetch user data
+  const fetchUser = async () => {
+    const token = localStorage.getItem("key");
+    if (!token) {
+      console.error("Token not found in local storage");
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/users/token/${token}`,
+        {
+          headers: { Authorization: token },
+        }
+      );
+      if (response.data) {
+        setUserData(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
   };
 
-  const handleCloseLightbox = () => {
-    setSelectedRecord(null);
+  // Fetch pets data
+  const fetchPets = async (userId) => {
+    try {
+      const token = localStorage.getItem("key");
+      const response = await axios.get(
+        `http://localhost:3000/api/pets/owner/${userId}`,
+        {
+          headers: { Authorization: token },
+        }
+      );
+      if (response.data) {
+        setPets(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching pets:", error);
+    }
   };
 
-  const handleDownloadRecord = () => {
-    alert("Download functionality is not implemented yet.");
+  // Fetch a specific pet's health record
+  const fetchPetRecord = async (petId) => {
+    const token = localStorage.getItem("key");
+    if (!token) {
+      console.error("Token not found in local storage");
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/pets/records/${petId}`,
+        { headers: { Authorization: token } }
+      );
+      if (response.data && response.data.records.length > 0) {
+        const record = response.data.records[0];
+        setSelectedRecord({
+          ownerInformation: {
+            name: record.ownerInformation?.name || "N/A",
+            contactInformation:
+              record.ownerInformation?.contactInformation || "N/A",
+          },
+          medicalHistory: {
+            allergies: (record.medicalHistory?.allergies || []).join(", "),
+            medications: (record.medicalHistory?.medications || []).join(", "),
+            vaccinations: (record.medicalHistory?.vaccinations || []).join(
+              ", "
+            ),
+            surgeries: (record.medicalHistory?.surgeries || []).join(", "),
+            illnesses: (record.medicalHistory?.illnesses || []).join(", "),
+            behavioralIssues: (
+              record.medicalHistory?.behavioralIssues || []
+            ).join(", "),
+            dietaryRestrictions: (
+              record.medicalHistory?.dietaryRestrictions || []
+            ).join(", "),
+          },
+          vitalSigns: {
+            temperature:
+              record.checkupInformation?.vitalSigns?.temperature || "N/A",
+            heartRate:
+              record.checkupInformation?.vitalSigns?.heartRate || "N/A",
+            respiratoryRate:
+              record.checkupInformation?.vitalSigns?.respiratoryRate || "N/A",
+            weight: record.checkupInformation?.vitalSigns?.weight || "N/A",
+            bodyConditionScore:
+              record.checkupInformation?.vitalSigns?.bodyConditionScore ||
+              "N/A",
+            hydrationStatus:
+              record.checkupInformation?.vitalSigns?.hydrationStatus || "N/A",
+          },
+          dateOfCheckup: record.checkupInformation?.dateOfCheckup || "N/A",
+          physicalExamFindings:
+            record.checkupInformation?.physicalExamFindings || "N/A",
+          laboratoryResults:
+            record.checkupInformation?.laboratoryResults || "N/A",
+          diagnosticTests: record.checkupInformation?.diagnosticTests || "N/A",
+          treatmentPlan: record.checkupInformation?.treatmentPlan || "N/A",
+          behavioralNotes: (
+            record.additionalFields?.behavioralNotes || []
+          ).join(", "),
+        });
+      } else {
+        setSelectedRecord(null);
+        console.warn(`No records found for pet with ID: ${petId}`);
+      }
+    } catch (error) {
+      console.error("Error fetching pet data:", error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (userData._id) {
+      fetchPets(userData._id);
+    }
+  }, [userData]);
+
+  const handlePetClick = (petId) => {
+    fetchPetRecord(petId);
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-semibold text-center mb-4">
-        Health Records
-      </h2>
-      <table className="min-w-full bg-white rounded-lg shadow-md overflow-hidden">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Record ID
-            </th>
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Pet ID
-            </th>
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Owner Name
-            </th>
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Date of Checkup
-            </th>
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {records.map((record, index) => (
-            <tr key={record._id} className="border-t">
-              <td className="px-6 py-4 text-sm text-gray-700">{index + 1}</td>
-              <td className="px-6 py-4 text-sm text-gray-700">
-                {record.petId}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-700">
-                {record.ownerInformation.name}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-700">
-                {record.checkupInformation.dateOfCheckup
-                  ?.map((date) => new Date(date).toLocaleDateString())
-                  .join(", ")}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-700 space-x-2">
-                <button
-                  onClick={() => handleOpenLightbox(record)}
-                  className="text-indigo-600 hover:text-indigo-800 font-semibold"
-                >
-                  View
-                </button>
-                <button
-                  onClick={() => onEdit(record)}
-                  className="text-blue-600 hover:text-blue-800 font-semibold"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => onDelete(record._id)}
-                  className="text-red-600 hover:text-red-800 font-semibold"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {selectedRecord && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full relative shadow-lg">
-            <button
-              onClick={handleCloseLightbox}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-            >
-              Close
-            </button>
-            <h3 className="text-xl font-semibold mb-4 text-center">
-              Record Details
-            </h3>
-
-            <div className="space-y-2">
-              <p>
-                <strong>Pet ID:</strong> {selectedRecord.petId}
-              </p>
-              <p>
-                <strong>Owner Name:</strong>{" "}
-                {selectedRecord.ownerInformation.name}
-              </p>
-              <p>
-                <strong>Contact Information:</strong>{" "}
-                {selectedRecord.ownerInformation.contactInformation}
-              </p>
-
-              <p>
-                <strong>Medical History:</strong>
-              </p>
-              <ul className="pl-4">
-                {Object.entries(selectedRecord.medicalHistory).map(
-                  ([key, value]) => (
-                    <li key={key} className="capitalize">
-                      <strong>{key}:</strong>{" "}
-                      {Array.isArray(value) ? value.join(", ") : value}
-                    </li>
-                  )
-                )}
-              </ul>
-
-              <p>
-                <strong>Checkup Information:</strong>
-              </p>
-              {selectedRecord.checkupInformation && (
-                <div className="pl-4">
-                  <p>
-                    <strong>Dates:</strong>{" "}
-                    {selectedRecord.checkupInformation.dateOfCheckup
-                      ?.map((date) => new Date(date).toLocaleDateString())
-                      .join(", ")}
-                  </p>
-                  <p>
-                    <strong>Vital Signs:</strong>
-                  </p>
-                  <ul>
-                    {Object.entries(
-                      selectedRecord.checkupInformation.vitalSigns
-                    ).map(([key, values]) => (
-                      <li key={key} className="capitalize">
-                        {key}:{" "}
-                        {Array.isArray(values) ? values.join(", ") : values}
-                      </li>
-                    ))}
-                  </ul>
-                  <p>
-                    <strong>Physical Exam Findings:</strong>{" "}
-                    {selectedRecord.checkupInformation.physicalExamFindings}
-                  </p>
-                  <p>
-                    <strong>Laboratory Results:</strong>{" "}
-                    {selectedRecord.checkupInformation.laboratoryResults}
-                  </p>
-                  <p>
-                    <strong>Diagnostic Tests:</strong>{" "}
-                    {selectedRecord.checkupInformation.diagnosticTests}
-                  </p>
-                  <p>
-                    <strong>Treatment Plan:</strong>{" "}
-                    {selectedRecord.checkupInformation.treatmentPlan}
-                  </p>
-                </div>
-              )}
-
-              <p>
-                <strong>Behavioral Notes:</strong>{" "}
-                {selectedRecord.additionalFields?.behavioralNotes?.join(", ")}
-              </p>
-            </div>
-
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={handleDownloadRecord}
-                className="py-2 px-4 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-500"
-              >
-                Download
-              </button>
-              <button
-                onClick={handleCloseLightbox}
-                className="py-2 px-4 bg-gray-600 text-white font-semibold rounded-md shadow-sm hover:bg-gray-500"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+    <div className="relative flex flex-col p-4">
+      {/* Pets Section */}
+      <div className="flex-1 p-6 bg-white rounded-lg shadow-md">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Pets</h2>
         </div>
-      )}
+        <div className="grid grid-cols-4 gap-6">
+          {pets.map((pet) => (
+            <div
+              key={pet._id}
+              className="flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => handlePetClick(pet._id)}
+            >
+              <img
+                src={pet.profilePicture || "https://via.placeholder.com/150"}
+                alt={`${pet.name}'s profile`}
+                className="w-20 h-20 rounded-full"
+              />
+              <p className="text-lg font-medium">{pet.name}</p>
+              <Button
+                onClick={() => handlePetClick(pet._id)}
+                className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+              >
+                <FaSearch className="inline-block mr-2" />
+                View Record
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Health Record Section */}
+      <div className="flex-1 p-6 bg-white rounded-lg shadow-md mt-6">
+        <h2 className="text-2xl font-bold mb-4">Health Record</h2>
+        {selectedRecord ? (
+          <table className="min-w-full bg-white border">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b">Field</th>
+                <th className="py-2 px-4 border-b">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="py-2 px-4 border-b">Owner Name</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.ownerInformation.name}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Owner Name</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.ownerInformation.name}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Contact Information</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.ownerInformation.contactInformation}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Allergies</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.medicalHistory.allergies}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Medications</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.medicalHistory.medications}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Vaccinations</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.medicalHistory.vaccinations}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Surgeries</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.medicalHistory.surgeries}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Illnesses</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.medicalHistory.illnesses}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Behavioral Issues</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.medicalHistory.behavioralIssues}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Dietary Restrictions</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.medicalHistory.dietaryRestrictions}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Temperature</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.vitalSigns.temperature}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Heart Rate</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.vitalSigns.heartRate}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Respiratory Rate</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.vitalSigns.respiratoryRate}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Weight</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.vitalSigns.weight}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Body Condition Score</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.vitalSigns.bodyConditionScore}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Hydration Status</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.vitalSigns.hydrationStatus}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Date of Checkup</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.dateOfCheckup}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Physical Exam Findings</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.physicalExamFindings}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Laboratory Results</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.laboratoryResults}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Diagnostic Tests</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.diagnosticTests}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Treatment Plan</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.treatmentPlan}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-2 px-4 border-b">Behavioral Notes</td>
+                <td className="py-2 px-4 border-b">
+                  {selectedRecord.behavioralNotes}
+                </td>
+              </tr>
+              {/* Additional rows */}
+            </tbody>
+          </table>
+        ) : (
+          <p>Select a pet to view its health record.</p>
+        )}
+      </div>
     </div>
   );
 };

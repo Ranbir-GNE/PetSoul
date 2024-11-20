@@ -8,11 +8,9 @@ import { Button } from "../ui/button";
 const ViewProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState({
-    username: "",
     firstName: "",
     lastName: "",
     email: "",
-    phoneNumber: "",
     address: "",
     pincode: "",
   });
@@ -20,7 +18,7 @@ const ViewProfile = () => {
   const fetchUser = async () => {
     const token = localStorage.getItem("key");
     if (!token) {
-      console.error("Token not found in local storage");
+      console.log("Token not found in local storage");
       return;
     }
     try {
@@ -30,7 +28,7 @@ const ViewProfile = () => {
       );
       setUserData(response.data);
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   };
 
@@ -52,18 +50,19 @@ const ViewProfile = () => {
     e.preventDefault();
     const token = localStorage.getItem("key");
     if (!token) {
-      console.error("Token not found in local storage");
+      console.log("Token not found in local storage");
       return;
     }
     try {
       const response = await axios.put(
         `http://localhost:3000/api/users/${userData._id}`,
-        userData,
-        { headers: { Authorization: token } }
+        userData
       );
+      if (!response) {
+      }
       console.log("Profile updated successfully:", response.data);
     } catch (error) {
-      console.error("Error updating user profile:", error.message);
+      console.log("Error updating user profile:", error.message);
     } finally {
       setIsEditing(false);
     }
@@ -72,14 +71,14 @@ const ViewProfile = () => {
   const handleDelete = async () => {
     const token = localStorage.getItem("key");
     if (!token) {
-      console.error("Token not found in local storage");
+      console.log("Token not found in local storage");
       return;
     }
     try {
       await axios.delete(`http://localhost:3000/api/users/${userData._id}`);
       console.log("User deleted successfully");
     } catch (error) {
-      console.error("Error deleting user profile:", error.message);
+      console.log("Error deleting user profile:", error.message);
     }
   };
 
@@ -150,13 +149,6 @@ const ViewProfile = () => {
           </div>
           <form className="space-y-4" onSubmit={handleSave}>
             <Input
-              label="Username"
-              name="username"
-              placeholder="Username"
-              value={userData.username}
-              onChange={handleInputChange}
-            />
-            <Input
               label="First Name"
               name="firstName"
               placeholder="First Name"
@@ -177,13 +169,7 @@ const ViewProfile = () => {
               value={userData.email}
               onChange={handleInputChange}
             />
-            <Input
-              label="Phone Number"
-              name="phoneNumber"
-              placeholder="Phone Number"
-              value={userData.phoneNumber}
-              onChange={handleInputChange}
-            />
+
             <Input
               label="Address"
               name="address"

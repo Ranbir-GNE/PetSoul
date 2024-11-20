@@ -47,7 +47,7 @@ const Sidebar = () => {
           </li>
           <li
             className="flex items-center space-x-2 py-2 px-4 hover:text-blue-400 cursor-pointer"
-            onClick={() => navigate("/vaccinations")}
+            onClick={() => navigate("/vaccination")}
           >
             <FaSyringe />
             <span>Vaccinations</span>

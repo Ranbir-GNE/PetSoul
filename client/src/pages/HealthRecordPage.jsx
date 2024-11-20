@@ -4,6 +4,7 @@ import Navbar from "../components/dashboard/Navbar";
 import Notifications from "../components/dashboard/Notifications";
 import Footer from "@/components/dashboard/Footer";
 import AddRecordForm from "@/components/healthRecord/AddRecordForm";
+import ViewHealthRecord from "../components/healthRecord/ViewHealthRecord";
 
 const HealthRecordPage = () => {
   return (
@@ -19,7 +20,7 @@ const HealthRecordPage = () => {
 
         <div className="flex-1 grid grid-cols-12">
           <div className="col-span-10 overflow-y-auto">
-            <AddRecordForm />
+            < ViewHealthRecord/>
             <Footer />
           </div>
           <div className="col-span-2">

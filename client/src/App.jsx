@@ -11,8 +11,8 @@ import { Toaster } from "sonner";
 import NotFoundPage from "./pages/NotFound";
 import ChartComponent from "./components/dashboard/ChartComponent";
 import userPetContext from "./context/UserPetContext";
-import userContext from "./context/UserContext";
 import { useState } from "react";
+import VaccinationPage from "./pages/VaccinationPage";
 
 function App() {
   const [userData, setUserData] = useState({});
@@ -36,8 +36,8 @@ function App() {
             <Route path="/record" element={<HealthRecordPage />} />
             <Route path="*" element={<NotFoundPage />} />
             <Route path="/chart" element={<ChartComponent />} />
+            <Route path="/vaccination" element={<VaccinationPage />} />
             {/* <Route path="/signup" element={<SignupPage />} />
-        <Route path="/discover" element={<DiscoverPage />} />
         <Route path="/community" element={<CommunityPage />} /> */}
           </Routes>
           {/* <Footer /> */}

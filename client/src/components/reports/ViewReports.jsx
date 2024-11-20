@@ -1,138 +1,226 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { FaSearch, FaTimes } from "react-icons/fa";
+import { Button } from "../ui/button";
 
-const ViewReport = ({ reports = [], onEdit, onDelete }) => {
+const Lightbox = ({ report, onClose }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg max-w-3xl w-full">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Report Details</h2>
+        <Button onClick={onClose} className="text-red-500 hover:text-red-700">
+          <FaTimes />
+        </Button>
+      </div>
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h3 className="font-semibold">Vital Signs</h3>
+            <p>Temperature: {report.vitalSigns.temperature}</p>
+            <p>Heart Rate: {report.vitalSigns.heartRate}</p>
+            <p>Respiratory Rate: {report.vitalSigns.respiratoryRate}</p>
+            <p>Weight: {report.vitalSigns.weight}</p>
+            <p>Body Condition Score: {report.vitalSigns.bodyConditionScore}</p>
+            <p>Hydration Status: {report.vitalSigns.hydrationStatus}</p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold">Physical Examination</h3>
+            {Object.entries(report.physicalExamination).map(([key, value]) => (
+              <p key={key}>
+                {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
+              </p>
+            ))}
+          </div>
+        </div>
+        <div>
+          <h3 className="font-semibold">Additional Tests</h3>
+          {Object.entries(report.additionalTests).map(([key, value]) => (
+            <p key={key}></p>
+          ))}
+        </div>
+        <div>
+          <h3 className="font-semibold">Laboratory Tests</h3>
+          {Object.entries(report.laboratoryTests).map(([key, value]) => (
+            <p key={key}>
+              {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const ViewReports = () => {
+  const [userData, setUserData] = useState({});
+  const [pets, setPets] = useState([]);
+  const [selectedPetId, setSelectedPetId] = useState(null);
+  const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [isLoadingPets, setIsLoadingPets] = useState(false);
+  const [isLoadingReports, setIsLoadingReports] = useState(false);
 
-  const handleOpenLightbox = (report) => {
+  // Fetch user data
+  const fetchUser = async () => {
+    const token = localStorage.getItem("key");
+    if (!token) {
+      console.error("Token not found in local storage");
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/users/token/${token}`,
+        {
+          headers: { Authorization: token },
+        }
+      );
+      if (response.data) {
+        setUserData(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+
+  // Fetch pets data
+  const fetchPets = async (userId) => {
+    setIsLoadingPets(true);
+    try {
+      const token = localStorage.getItem("key");
+      const response = await axios.get(
+        `http://localhost:3000/api/pets/owner/${userId}`,
+        {
+          headers: { Authorization: token },
+        }
+      );
+      if (response.data) {
+        setPets(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching pets:", error);
+    } finally {
+      setIsLoadingPets(false);
+    }
+  };
+
+  // Fetch reports for a selected pet
+  const fetchPetReports = async (petId) => {
+    setIsLoadingReports(true);
+    setReports([]);
+    const token = localStorage.getItem("key");
+    if (!token) {
+      console.error("Token not found in local storage");
+      setIsLoadingReports(false);
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/pets/reports/${petId}`,
+        { headers: { Authorization: token } }
+      );
+      if (response.data && response.data.reports) {
+        setReports(response.data.reports);
+      } else {
+        console.warn(`No reports found for pet with ID: ${petId}`);
+      }
+    } catch (error) {
+      console.error("Error fetching pet reports:", error.message);
+    } finally {
+      setIsLoadingReports(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (userData._id) {
+      fetchPets(userData._id);
+    }
+  }, [userData]);
+
+  const handlePetClick = (petId) => {
+    setSelectedPetId(petId);
+    fetchPetReports(petId);
+  };
+
+  const handleReportClick = (report) => {
     setSelectedReport(report);
   };
 
-  const handleCloseLightbox = () => {
+  const closeLightbox = () => {
     setSelectedReport(null);
   };
 
-  const handleDownloadReport = () => {
-    alert("Download functionality is not implemented yet.");
-  };
-
   return (
-    <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-semibold text-center mb-4">Reports</h2>
-      <table className="min-w-full bg-white rounded-lg shadow-md overflow-hidden">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Report Number
-            </th>
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Date of Checkup
-            </th>
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Pet ID
-            </th>
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Report Type
-            </th>
-            <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {reports.map((report, index) => (
-            <tr key={report._id} className="border-t">
-              <td className="px-6 py-4 text-sm text-gray-700">{index + 1}</td>
-              <td className="px-6 py-4 text-sm text-gray-700">
-                {new Date(report.dateOfCheckup).toLocaleDateString()}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-700">
-                {report.petId}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-700 capitalize">
-                {report.reportType}
-              </td>
-              <td className="px-6 py-4 text-sm text-gray-700 space-x-2">
-                <button
-                  onClick={() => handleOpenLightbox(report)}
-                  className="text-indigo-600 hover:text-indigo-800 font-semibold"
-                >
-                  View
-                </button>
-                <button
-                  onClick={() => onEdit(report)}
-                  className="text-blue-600 hover:text-blue-800 font-semibold"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => onDelete(report._id)}
-                  className="text-red-600 hover:text-red-800 font-semibold"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {selectedReport && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full relative shadow-lg">
-            <button
-              onClick={handleCloseLightbox}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-            >
-              Close
-            </button>
-            <h3 className="text-xl font-semibold mb-4 text-center">
-              Report Details
-            </h3>
-
-            <div className="space-y-2">
-              <p>
-                <strong>Pet ID:</strong> {selectedReport.petId}
-              </p>
-              <p>
-                <strong>Date of Checkup:</strong>{" "}
-                {new Date(selectedReport.dateOfCheckup).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>Report Type:</strong> {selectedReport.reportType}
-              </p>
-              <p>
-                <strong>Vital Signs:</strong>
-              </p>
-              <ul className="pl-4">
-                {Object.entries(selectedReport.vitalSigns).map(
-                  ([key, value]) => (
-                    <li key={key}>
-                      {key}: {value}
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-
-            <div className="mt-6 flex justify-end space-x-4">
-              <button
-                onClick={handleDownloadReport}
-                className="py-2 px-4 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-500"
-              >
-                Download
-              </button>
-              <button
-                onClick={handleCloseLightbox}
-                className="py-2 px-4 bg-gray-600 text-white font-semibold rounded-md shadow-sm hover:bg-gray-500"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+    <div className="relative flex flex-col p-4">
+      {/* Pets Section */}
+      <div className="flex-1 p-6 bg-white rounded-lg shadow-md">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Pets</h2>
         </div>
+        {isLoadingPets ? (
+          <p>Loading pets...</p>
+        ) : (
+          <div className="grid grid-cols-4 gap-6">
+            {pets.map((pet) => (
+              <div
+                key={pet._id}
+                className="flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handlePetClick(pet._id)}
+              >
+                <img
+                  src={pet.profilePicture || "https://via.placeholder.com/150"}
+                  alt={`${pet.name}'s profile`}
+                  className="w-20 h-20 rounded-full"
+                />
+                <p className="text-lg font-medium">{pet.name}</p>
+                <Button className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
+                  <FaSearch className="inline-block mr-2" />
+                  View Reports
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Reports Section */}
+      <div className="flex-1 p-6 bg-white rounded-lg shadow-md mt-6">
+        <h2 className="text-2xl font-bold mb-4">Reports</h2>
+        {isLoadingReports ? (
+          <p>Loading reports...</p>
+        ) : reports.length > 0 ? (
+          <ul className="space-y-4">
+            {reports.map((report) => (
+              <li
+                key={report._id}
+                className="p-4 bg-gray-100 rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handleReportClick(report)}
+              >
+                <p>
+                  <strong>Created At:</strong>{" "}
+                  {new Date(report.createdAt).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Report ID:</strong> {report._id}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Select a pet to view its reports.</p>
+        )}
+      </div>
+
+      {/* Lightbox Popup */}
+      {selectedReport && (
+        <Lightbox report={selectedReport} onClose={closeLightbox} />
       )}
     </div>
   );
 };
 
-export default ViewReport;
+export default ViewReports;

@@ -27,7 +27,7 @@ const createPet = async (req, res) => {
 };
 
 const updatePet = async (req, res) => {
-  const id = req.param.id;
+  const id = req.params.id;
   const { name, breed, species, profilePicture, age } = req.body;
   try {
     const pet = await PetModel.findByIdAndUpdate(
@@ -44,14 +44,14 @@ const updatePet = async (req, res) => {
     if (!pet) {
       return res.status(400).json({ message: "Failed to Update Pet" });
     }
-    res.status(200).json(pet, { message: "Pet Updated" });
+    res.status(200).json({ pet, message: "Pet Updated" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 const deletePet = async (req, res) => {
-  const id = req.param.id;
+  const id = req.params.id;
   try {
     const pet = await PetModel.findByIdAndDelete(id);
     if (!pet) {
@@ -80,7 +80,7 @@ const getPetsByOwnerId = async (req, res) => {
 };
 
 const getPetDetails = async (req, res) => {
-  const id = req.param.id;
+  const id = req.params.id;
   if (!id) {
     return res.status(400).json({ message: "Pet ID is required" });
   }
@@ -89,12 +89,14 @@ const getPetDetails = async (req, res) => {
     if (!pet) {
       return res.status(400).json({ message: "Pet Not Found" });
     }
-    res.status(200).json(pet, { message: "Pet Found" });
-  } catch (err) {}
+    res.status(200).json({ pet, message: "Pet Found" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 const getReports = async (req, res) => {
-  const id = req.param.id;
+  const id = req.params.id;
   if (!id) {
     return res.status(400).json({ message: "Pet ID is required" });
   }
@@ -107,14 +109,14 @@ const getReports = async (req, res) => {
     if (!reports) {
       return res.status(400).json({ message: "No Reports Found" });
     }
-    res.status(200).json(reports, { message: "Reports Found" });
+    res.status(200).json({ reports, message: "Reports Found" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 const getRecords = async (req, res) => {
-  const id = req.param.id;
+  const id = req.params.id;
   if (!id) {
     return res.status(400).json({ message: "Pet ID is required" });
   }
@@ -127,7 +129,7 @@ const getRecords = async (req, res) => {
     if (!records) {
       return res.status(400).json({ message: "No Records Found" });
     }
-    res.status(400).json(records, { message: "Records Found" });
+    res.status(200).json({ records, message: "Records Found" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -147,9 +149,7 @@ const contact = async (req, res) => {
     if (!owner) {
       return res.status(400).json({ message: "Owner Not Found" });
     }
-    res.status(200).json(owner, {
-      message: "Owner Contact Found",
-    });
+    res.status(200).json({ owner, message: "Owner Contact Found" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
