@@ -1,15 +1,15 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import LoadingButton from "../dashboard/LoadingButton";
-// import authContext from "../Context/authContext";
+import userContext from "../../context/UserContext";
 import image from "../../assets/pet1.jpg";
 import { Input } from "../ui/input";
 
 const LoginRegister = () => {
   const [isLoading, setIsLoading] = useState();
-  // const authData = useContext(authContext);
+  const authContext = useContext(userContext);
   const [isLogin, setIsLogin] = useState(true);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({
@@ -55,7 +55,7 @@ const LoginRegister = () => {
       }
       const token = response.data.token;
       localStorage.setItem("key", token);
-      // authData.setAuth(true);
+      authContext.setUserData(response.data);
       toast.success("Login Success");
 
       navigate("/dashboard");

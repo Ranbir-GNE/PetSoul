@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
 
-const AddRecordForm = () => {
+const AddRecordForm = ({ onSubmit }) => {
+  const [userData, setUserData] = useState(null);
+  const [pets, setPets] = useState([]);
+  const [isLoadingPets, setIsLoadingPets] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     petId: "",
     ownerInformation: {
@@ -37,6 +42,51 @@ const AddRecordForm = () => {
       behavioralNotes: [""],
     },
   });
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("key");
+      if (!token) {
+        console.error("Token not found in local storage");
+        return;
+      }
+      try {
+        const response = await axios.get(
+          `http://localhost:3000/api/users/token/${token}`,
+          { headers: { Authorization: token } }
+        );
+        if (response.data) {
+          setUserData(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (userData && userData._id) {
+      const fetchPets = async () => {
+        setIsLoadingPets(true);
+        try {
+          const token = localStorage.getItem("key");
+          const response = await axios.get(
+            `http://localhost:3000/api/pets/owner/${userData._id}`,
+            { headers: { Authorization: token } }
+          );
+          setPets(response.data || []);
+        } catch (error) {
+          console.error("Error fetching pets:", error);
+        } finally {
+          setIsLoadingPets(false);
+        }
+      };
+
+      fetchPets();
+    }
+  }, [userData]);
 
   const handleChange = (section, field, value, index = null) => {
     if (index !== null) {
@@ -72,18 +122,45 @@ const AddRecordForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    const { vitalSigns, dateOfCheckup, petId } = formData.checkupInformation;
+    const isVitalSignsEmpty = Object.values(vitalSigns).some(
+      (value) => value === ""
+    );
+    if (isVitalSignsEmpty || !dateOfCheckup || !petId) {
+      toast.error("Please fill in all vital signs and checkup date.");
+      setIsLoading(false);
+      return;
+    }
+
+    const token = localStorage.getItem("key");
+    if (!token) {
+      console.error("Token not found in local storage");
+      toast.error("Authentication token not found. Please log in again.");
+      setIsLoading(false);
+      return;
+    }
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/healthRecords/",
-        formData
+        "http://localhost:3000/api/healthRecords",
+        formData,
+        { headers: { Authorization: token } }
       );
-      toast.success("Health record added successfully!");
-      console.log("Response:", response.data);
-    } catch (error) {
-      console.error("Error adding record:", error);
-      toast.error("Failed to add health record.");
+      if (response) {
+        toast.success("Health record added successfully!");
+        if (onSubmit) {
+          onSubmit(response.data);
+        }
+      }
+    } catch (err) {
+      console.error("Error adding health record:", err);
+      toast.error("Failed to add health record. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -97,12 +174,18 @@ const AddRecordForm = () => {
         <label className="block text-sm font-medium text-gray-700">
           Pet ID
         </label>
-        <Input
-          type="text"
+        <select
           value={formData.petId}
-          onChange={(e) => handleChange("petId", null, e.target.value)}
-          className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-        />
+          onChange={(e) => setFormData({ ...formData, petId: e.target.value })}
+          className="w-full mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500"
+        >
+          <option value="">Select Pet</option>
+          {pets.map((pet) => (
+            <option key={pet._id} value={pet._id}>
+              {pet.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="mb-6">

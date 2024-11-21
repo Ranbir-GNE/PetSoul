@@ -11,7 +11,6 @@ const petRoutes = require("./Routes/PetsRoutes");
 const vaccinationRoutes = require("./Routes/VaccinationRoutes");
 
 const authMiddleware = require("./middleware/authMiddleware");
-const logger = require("./middleware/loggerMiddleware");
 const loggerMiddleware = require("./middleware/loggerMiddleware");
 
 const app = express();

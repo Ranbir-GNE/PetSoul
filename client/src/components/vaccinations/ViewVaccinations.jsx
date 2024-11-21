@@ -31,18 +31,36 @@ const Lightbox = ({ vaccination, onClose, onEdit, onDelete }) => {
         </div>
         {isEditing ? (
           <div className="space-y-4">
-            <Input
-              label="Vaccination Name"
+            <select
               name="vaccinationName"
               value={editedVaccination.vaccinationName}
               onChange={handleInputChange}
-            />
-            <Input
+              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            >
+              <option value="rabies">Rabies</option>
+              <option value="dhpp">DHPP</option>
+              <option value="corona">Corona</option>
+              <option value="leptospirosis">leptospirosis</option>
+              <option value="lyme">lyme</option>
+              <option value="bordetella">bordetella</option>
+              <option value="giardia">giardia</option>
+              <option value="feline leukemia">feline leukemia</option>
+              <option value="feline distemper">feline distemper</option>
+              <option value="feline rabies">feline rabies</option>
+              <option value="feline calicivirus">feline calicivirus</option>
+              <option value="feline chlamydia">feline chlamydia</option>
+            </select>
+            <select
               label="Vaccination Type"
               name="vaccinationType"
               value={editedVaccination.vaccinationType}
               onChange={handleInputChange}
-            />
+            >
+              <option value="one-time">One Time</option>
+              <option value="annual">Annual</option>
+              <option value="bu-annual">Bi Annual</option>
+              <option value="tri-annual">Tri Annual</option>
+            </select>
             <Input
               label="Vaccination Date"
               name="vaccinationDate"
@@ -57,12 +75,20 @@ const Lightbox = ({ vaccination, onClose, onEdit, onDelete }) => {
               value={editedVaccination.nextVaccinationDate.split("T")[0]}
               onChange={handleInputChange}
             />
-            <Input
-              label="Vaccine Status"
-              name="vaccineStatus"
-              value={editedVaccination.vaccineStatus}
-              onChange={handleInputChange}
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Vaccine Status
+              </label>
+              <select
+                name="vaccineStatus"
+                value={editedVaccination.vaccineStatus}
+                onChange={handleInputChange}
+                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+              >
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
             <Button onClick={saveEdit} className="bg-green-500 text-white">
               Save
             </Button>
@@ -73,7 +99,7 @@ const Lightbox = ({ vaccination, onClose, onEdit, onDelete }) => {
               <strong>Vaccination Name:</strong> {vaccination.vaccinationName}
             </p>
             <p>
-              <strong>Vaccination Name:</strong> {vaccination.vaccinationType}
+              <strong>Vaccination Type:</strong> {vaccination.vaccinationType}
             </p>
             <p>
               <strong>Vaccination Date:</strong>{" "}
@@ -109,7 +135,7 @@ const Lightbox = ({ vaccination, onClose, onEdit, onDelete }) => {
   );
 };
 
-const Vaccination = () => {
+const ViewVaccination = () => {
   const [userData, setUserData] = useState({});
   const [pets, setPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState(null);
@@ -301,7 +327,6 @@ const Vaccination = () => {
         )}
       </div>
 
-      {/* Lightbox Popup */}
       {selectedVaccination && (
         <Lightbox
           vaccination={selectedVaccination}
@@ -314,4 +339,4 @@ const Vaccination = () => {
   );
 };
 
-export default Vaccination;
+export default ViewVaccination;

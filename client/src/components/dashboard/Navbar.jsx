@@ -2,8 +2,11 @@ import React from "react";
 import logo from "../../assets/logo.png";
 import profile from "../../assets/profilePicture.jpg";
 import { Input } from "../ui/input";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="flex items-center justify-between p-4 bg-gray-800 object-cover">
       <div className="flex-shrink-0">
@@ -28,7 +31,12 @@ const Navbar = () => {
             </button>
           </li>
           <li>
-            <button className="text-white hover:text-blue-400">Login</button>
+            <button
+              className="text-white hover:text-blue-400"
+              onClick={() => navigate("/login")}
+            >
+              Login
+            </button>
           </li>
           <li>
             <img

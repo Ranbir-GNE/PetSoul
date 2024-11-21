@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
 import profile from "../../assets/profilePicture.jpg";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import userContext from "../../context/UserContext";
 
 const ViewProfile = () => {
+  const authContext = useContext(userContext);
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState({
     firstName: "",
@@ -31,6 +33,7 @@ const ViewProfile = () => {
       console.log(error);
     }
   };
+  console.log(authContext.userData);
 
   useEffect(() => {
     fetchUser();

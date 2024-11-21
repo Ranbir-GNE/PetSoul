@@ -102,7 +102,7 @@ const ViewRecord = () => {
             record.additionalFields?.behavioralNotes || []
           ).join(", "),
         });
-        setSelectedPet(petId); // Set the currently viewed pet
+        setSelectedPet(petId);
       } else {
         setSelectedRecord(null);
         console.warn(`No records found for pet with ID: ${petId}`);
@@ -158,38 +158,101 @@ const ViewRecord = () => {
             >
               Close
             </Button>
-            <h3 className="text-2xl font-bold mb-4">
+            <h3 className="text-2xl font-bold mb-2">
               Health Record: {pets.find((pet) => pet._id === selectedPet)?.name}
             </h3>
-            <table className="min-w-full bg-white">
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 border-b">Field</th>
-                  <th className="py-2 px-4 border-b">Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="py-2 px-4 border-b">Owner Name</td>
-                  <td className="py-2 px-4 border-b">
-                    {selectedRecord.ownerInformation.name}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-4 border-b">Contact Information</td>
-                  <td className="py-2 px-4 border-b">
+            <div>
+              <div className="grid grid-cols-2">
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.ownerInformation.name}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name:{" "}
                     {selectedRecord.ownerInformation.contactInformation}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-4 border-b">Allergies</td>
-                  <td className="py-2 px-4 border-b">
-                    {selectedRecord.medicalHistory.allergies}
-                  </td>
-                </tr>
-                {/* Add other fields similarly */}
-              </tbody>
-            </table>
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.medicalHistory.allergies}{" "}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.medicalHistory.medications}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.medicalHistory.vaccinations}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.medicalHistory.surgeries}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.medicalHistory.illnesses}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.medicalHistory.behavioralIssues}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name:{" "}
+                    {selectedRecord.medicalHistory.dietaryRestrictions}
+                  </p>
+                </div>
+                <div>
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.vitalSigns.temperature}
+                  </p>
+                </div>
+                <div>
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.vitalSigns.heartRate}
+                  </p>
+                </div>
+                <div>
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.vitalSigns.respiratoryRate}
+                  </p>
+                </div>
+                <div>
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.vitalSigns.weight}
+                  </p>
+                </div>
+                <div>
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.vitalSigns.bodyConditionScore}
+                  </p>
+                </div>
+                <div>
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.vitalSigns.hydrationStatus}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name: {selectedRecord.dateOfCheckup}
+                  </p>
+                </div>
+
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Owner Name:{selectedRecord.dateOfCheckup}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
