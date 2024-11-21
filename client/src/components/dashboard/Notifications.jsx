@@ -1,39 +1,25 @@
-import React, { useState } from "react";
-import profile from "../../assets/profilePicture.jpg";
+import React, { useEffect } from "react";
 
-const Notifications = () => {
-  const [isOpen, setIsOpen] = useState(false);
+import { Webchat, WebchatProvider, getClient } from "@botpress/webchat";
+[2, 5, 11];
 
-  const toggleAccordion = () => {
-    setIsOpen(!isOpen);
-  };
+const Chatbot = () => {
+  const clientId = "process.env.BOTPRESS_CLIENT_ID";
+
+  const hostUrl = "https://your-botpress-server.com";
+
+  useEffect(() => {
+    const client = getClient({ clientId, hostUrl });
+    [2, 3, 5];
+
+    client.init();
+  }, [clientId, hostUrl]);
 
   return (
-    <div className="p-2">
-      <div className="flex flex-col p-2 bg-white shadow-md rounded-md">
-        <div
-          className="flex items-center cursor-pointer"
-          onClick={toggleAccordion}
-        >
-          <div className="mr-3">
-            <img
-              className="w-12 h-12 rounded-full"
-              src={profile}
-              alt="profile picture"
-            />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-800">Notification Title</p>
-          </div>
-        </div>
-        {isOpen && (
-          <div className="mt-3">
-            <p className="text-gray-600">Notification Content</p>
-          </div>
-        )}
-      </div>
-    </div>
+    <WebchatProvider client={client}>
+      <Webchat />
+    </WebchatProvider>
   );
 };
 
-export default Notifications;
+export default Chatbot;

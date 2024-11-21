@@ -12,10 +12,11 @@ const ViewProfile = () => {
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",
-    email: "",
     address: "",
     pincode: "",
+    profilePicture: "",
   });
+  const [profilePictureFile, setProfilePictureFile] = useState(null);
 
   const fetchUser = async () => {
     const token = localStorage.getItem("key");
@@ -33,7 +34,6 @@ const ViewProfile = () => {
       console.log(error);
     }
   };
-  console.log(authContext.userData);
 
   useEffect(() => {
     fetchUser();
@@ -49,23 +49,62 @@ const ViewProfile = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    setProfilePictureFile(e.target.files[0]);
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
+    let imageUrl = userData.profilePicture;
+
+    if (profilePictureFile) {
+      try {
+        const imageFormData = new FormData();
+        imageFormData.append("file", profilePictureFile);
+        imageFormData.append(
+          "upload_preset",
+          import.meta.env.VITE_UPLOAD_PRESET
+        );
+
+        const response = await axios.post(
+          `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/upload`,
+          imageFormData
+        );
+
+        if (response && response.data.secure_url) {
+          imageUrl = response.data.secure_url;
+        } else {
+          console.error("Failed to upload image");
+          return;
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        return;
+      }
+    }
+
     const token = localStorage.getItem("key");
     if (!token) {
       console.log("Token not found in local storage");
       return;
     }
+
     try {
+      const updatedData = { ...userData, profilePicture: imageUrl };
       const response = await axios.put(
         `http://localhost:3000/api/users/${userData._id}`,
-        userData
+        updatedData,
+        { headers: { Authorization: token } }
       );
-      if (!response) {
+
+      if (response && response.data) {
+        setUserData(response.data);
+        console.log("Profile updated successfully:", response.data);
+      } else {
+        console.error("Error updating profile");
       }
-      console.log("Profile updated successfully:", response.data);
     } catch (error) {
-      console.log("Error updating user profile:", error.message);
+      console.error("Error updating user profile:", error.message);
     } finally {
       setIsEditing(false);
     }
@@ -102,7 +141,7 @@ const ViewProfile = () => {
         <div className="grid grid-cols-2 gap-6">
           <div className="col-span-2 flex justify-center">
             <img
-              src={profile}
+              src={userData.profilePicture || profile}
               alt="User Profile"
               className="w-44 h-44 rounded-full shadow-md"
             />
@@ -138,7 +177,6 @@ const ViewProfile = () => {
         </div>
       </div>
 
-      {/* Edit Form - Sliding Sheet */}
       {isEditing && (
         <div className="fixed top-0 right-0 h-full w-full md:w-1/3 bg-white p-6 shadow-lg transform transition-transform duration-300 ease-in-out">
           <div className="flex justify-between items-center mb-6">
@@ -158,6 +196,11 @@ const ViewProfile = () => {
               value={userData.firstName}
               onChange={handleInputChange}
             />
+            <input
+              type="file"
+              name="profilePicture"
+              onChange={handleFileChange}
+            />
             <Input
               label="Last Name"
               name="lastName"
@@ -172,7 +215,6 @@ const ViewProfile = () => {
               value={userData.email}
               onChange={handleInputChange}
             />
-
             <Input
               label="Address"
               name="address"

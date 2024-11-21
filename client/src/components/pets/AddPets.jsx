@@ -11,7 +11,7 @@ const AddPetForm = ({ onPetAdded }) => {
     name: "",
     species: "",
     breed: "",
-    profilePicture: "",
+    profilePicture: null,
     age: "",
   });
 
@@ -19,10 +19,10 @@ const AddPetForm = ({ onPetAdded }) => {
   const [userData, setUserData] = useState();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: files ? files[0] : value,
     });
   };
 
@@ -86,7 +86,7 @@ const AddPetForm = ({ onPetAdded }) => {
 
       const response = await axios.post(
         "http://localhost:3000/api/pets/",
-        { ...formData, ownerId: userData._id },
+        { ...formData, profilePicture: imageUrl, ownerId: userData._id },
         {
           headers: { Authorization: token },
         }
@@ -97,7 +97,7 @@ const AddPetForm = ({ onPetAdded }) => {
         name: "",
         species: "",
         breed: "",
-        profilePicture: imageUrl,
+        profilePicture: null,
         age: "",
       });
     } catch (error) {
@@ -121,18 +121,6 @@ const AddPetForm = ({ onPetAdded }) => {
           type="text"
           name="name"
           value={formData.name}
-          onChange={handleChange}
-          placeholder="Pet's Name"
-          className="mt-1"
-          required
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Name</label>
-        <input
-          type="file"
-          name="name"
-          value={formData.profilePicture}
           onChange={handleChange}
           placeholder="Pet's Name"
           className="mt-1"
@@ -175,14 +163,12 @@ const AddPetForm = ({ onPetAdded }) => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700">
-          Profile Picture (URL)
+          Profile Picture
         </label>
-        <Input
-          type="url"
+        <input
+          type="file"
           name="profilePicture"
-          value={formData.profilePicture}
           onChange={handleChange}
-          placeholder="Image URL"
           className="mt-1"
         />
       </div>

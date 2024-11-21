@@ -74,13 +74,7 @@ const updateUser = async (req, res) => {
   if (!id) {
     return res.status(400).json({ message: "User ID is required" });
   }
-  const { firstName, lastName, address, pincode } = req.body;
-  const existPhoneNumber = await UserModel.findOne({ phoneNumber });
-  if (existPhoneNumber) {
-    return res
-      .status(400)
-      .json({ message: "This Phone Number is already taken" });
-  }
+  const { firstName, lastName, address, pincode, profilePicture } = req.body;
   try {
     const user = await UserModel.findByIdAndUpdate(
       id,
@@ -89,6 +83,7 @@ const updateUser = async (req, res) => {
         lastName,
         address,
         pincode,
+        profilePicture,
       },
       { runValidators: true }
     );

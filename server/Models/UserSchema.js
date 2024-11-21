@@ -7,6 +7,9 @@ const UserSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    profilePicture: {
+      type: String,
+    },
     firstName: {
       type: String,
       trim: true,

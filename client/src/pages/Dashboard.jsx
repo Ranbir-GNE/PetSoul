@@ -1,7 +1,6 @@
 import React from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
-import Notifications from "../components/dashboard/Notifications";
 import Grid from "../components/dashboard/Grid";
 import Footer from "@/components/dashboard/Footer";
 
@@ -23,7 +22,7 @@ const Dashboard = () => {
             <Footer />
           </div>
           <div className="col-span-2">
-            <Notifications />
+             
           </div>
         </div>
       </div>

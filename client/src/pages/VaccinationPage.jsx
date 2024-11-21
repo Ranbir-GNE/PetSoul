@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
-import Notifications from "../components/dashboard/Notifications";
 import Footer from "@/components/dashboard/Footer";
 import ViewVaccination from "@/components/vaccinations/ViewVaccinations";
 import AddVaccinationForm from "@/components/vaccinations/AddVaccinationForm";
@@ -30,16 +29,16 @@ const VaccinationPage = () => {
                 onClick={handleToggleVisibility}
                 className="mb-4 p-2 bg-blue-500 text-white rounded"
               >
-                {isVisible ? "Hide Report Form" : "Show Report Form"}
+                {isVisible
+                  ? "Hide Add Vaccination Form"
+                  : "Show Add Vaccination Form"}
               </button>
               {isVisible && <AddVaccinationForm />}
             </div>
             <ViewVaccination />
             <Footer />
           </div>
-          <div className="col-span-2">
-            <Notifications />
-          </div>
+          <div className="col-span-2"></div>
         </div>
       </div>
     </div>

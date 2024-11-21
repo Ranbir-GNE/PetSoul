@@ -32,12 +32,10 @@ const PetSchema = new mongoose.Schema(
         ref: "Report",
       },
     ],
-    recordId: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Record",
-      },
-    ],
+    recordId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Record",
+    },
   },
   {
     timestamps: true,

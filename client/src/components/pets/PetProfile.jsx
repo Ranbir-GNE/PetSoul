@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "../ui/button";
 import pet1 from "../../assets/pet1.jpg"; // Default pet image
+import { toast } from "sonner";
 
 const ViewRecord = () => {
   const [userData, setUserData] = useState({});
@@ -105,7 +106,7 @@ const ViewRecord = () => {
         setSelectedPet(petId);
       } else {
         setSelectedRecord(null);
-        console.warn(`No records found for pet with ID: ${petId}`);
+        toast.error("No records found for this pet");
       }
     } catch (error) {
       console.error("Error fetching pet record:", error.message);
@@ -170,85 +171,110 @@ const ViewRecord = () => {
                 </div>
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name:{" "}
+                    Contact Information:{" "}
                     {selectedRecord.ownerInformation.contactInformation}
                   </p>
                 </div>
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.medicalHistory.allergies}{" "}
+                    Allergies: {selectedRecord.medicalHistory.allergies}{" "}
                   </p>
                 </div>
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.medicalHistory.medications}
+                    Medications: {selectedRecord.medicalHistory.medications}
                   </p>
                 </div>
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.medicalHistory.vaccinations}
+                    Vaccinations: {selectedRecord.medicalHistory.vaccinations}
                   </p>
                 </div>
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.medicalHistory.surgeries}
+                    Surgeries: {selectedRecord.medicalHistory.surgeries}
                   </p>
                 </div>
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.medicalHistory.illnesses}
+                    Illnesses: {selectedRecord.medicalHistory.illnesses}
                   </p>
                 </div>
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.medicalHistory.behavioralIssues}
+                    Behavioral Issues:{" "}
+                    {selectedRecord.medicalHistory.behavioralIssues}
                   </p>
                 </div>
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name:{" "}
+                    Dietary Restrictions:{" "}
                     {selectedRecord.medicalHistory.dietaryRestrictions}
                   </p>
                 </div>
                 <div>
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.vitalSigns.temperature}
+                    Temperature: {selectedRecord.vitalSigns.temperature}
                   </p>
                 </div>
                 <div>
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.vitalSigns.heartRate}
+                    Heart Rate: {selectedRecord.vitalSigns.heartRate}
                   </p>
                 </div>
                 <div>
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.vitalSigns.respiratoryRate}
+                    Respiratory Rate:{" "}
+                    {selectedRecord.vitalSigns.respiratoryRate}
                   </p>
                 </div>
                 <div>
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.vitalSigns.weight}
+                    Weight: {selectedRecord.vitalSigns.weight}
                   </p>
                 </div>
                 <div>
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.vitalSigns.bodyConditionScore}
+                    Body Condition Score:{" "}
+                    {selectedRecord.vitalSigns.bodyConditionScore}
                   </p>
                 </div>
                 <div>
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.vitalSigns.hydrationStatus}
+                    Hydration Status:{" "}
+                    {selectedRecord.vitalSigns.hydrationStatus}
                   </p>
                 </div>
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.dateOfCheckup}
+                    Date of Checkup: {selectedRecord.dateOfCheckup}
                   </p>
                 </div>
 
                 <div className="col-span-2">
                   <p className="py-2 px-4 border-b">
-                    Owner Name:{selectedRecord.dateOfCheckup}
+                    Physical Exam Findings:{" "}
+                    {selectedRecord.physicalExamFindings}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Laboratory Results: {selectedRecord.laboratoryResults}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Diagnostic Tests: {selectedRecord.diagnosticTests}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Treatment Plan: {selectedRecord.treatmentPlan}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="py-2 px-4 border-b">
+                    Behavioral Notes: {selectedRecord.behavioralNotes}
                   </p>
                 </div>
               </div>

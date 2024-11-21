@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
-import Notifications from "../components/dashboard/Notifications";
 import Footer from "@/components/dashboard/Footer";
 import ViewReport from "@/components/reports/ViewReports";
 import AddReportForm from "@/components/reports/ReportForm";
@@ -39,7 +38,7 @@ const ReportPage = () => {
             <Footer />
           </div>
           <div className="col-span-2">
-            <Notifications />
+             
           </div>
         </div>
       </div>

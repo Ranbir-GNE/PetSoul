@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Sidebar from "../components/dashboard/Sidebar";
 import Navbar from "../components/dashboard/Navbar";
-import Notifications from "../components/dashboard/Notifications";
 import Footer from "@/components/dashboard/Footer";
 import AddRecordForm from "@/components/healthRecord/AddRecordForm";
 import ViewHealthRecord from "../components/healthRecord/ViewHealthRecord";
@@ -30,7 +29,7 @@ const HealthRecordPage = () => {
                 onClick={handleToggleVisibility}
                 className="mb-4 p-2 bg-blue-500 text-white rounded"
               >
-                {isVisible ? "Hide Report Form" : "Show Report Form"}
+                {isVisible ? "Hide Record Form" : "Show Record Form"}
               </button>
               {isVisible && <AddRecordForm />}
             </div>
@@ -38,7 +37,7 @@ const HealthRecordPage = () => {
             <Footer />
           </div>
           <div className="col-span-2">
-            <Notifications />
+             
           </div>
         </div>
       </div>
