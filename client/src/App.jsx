@@ -14,6 +14,7 @@ import userPetContext from "./context/UserPetContext";
 import userContext from "./context/UserContext";
 import { useState } from "react";
 import VaccinationPage from "./pages/VaccinationPage";
+import Chatbot from "./components/dashboard/Chatbot";
 
 function App() {
   const [userData, setUserData] = useState();
@@ -44,6 +45,7 @@ function App() {
         </userContext.Provider>
       </userPetContext.Provider>
       <Toaster />
+      <Chatbot />
     </>
   );
 }

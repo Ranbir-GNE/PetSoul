@@ -1,25 +1,12 @@
-import React, { useEffect } from "react";
+import React from "react";
+import Chatbot from "./Chatbot";
 
-import { Webchat, WebchatProvider, getClient } from "@botpress/webchat";
-[2, 5, 11];
-
-const Chatbot = () => {
-  const clientId = "process.env.BOTPRESS_CLIENT_ID";
-
-  const hostUrl = "https://your-botpress-server.com";
-
-  useEffect(() => {
-    const client = getClient({ clientId, hostUrl });
-    [2, 3, 5];
-
-    client.init();
-  }, [clientId, hostUrl]);
-
+const App = () => {
   return (
-    <WebchatProvider client={client}>
-      <Webchat />
-    </WebchatProvider>
+    <div>
+      <Chatbot />
+    </div>
   );
 };
 
-export default Chatbot;
+export default App;

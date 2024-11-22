@@ -2,6 +2,13 @@ import React from "react";
 import { Carousel, Card } from "@/components/ui/apple-cards-carousel";
 import chatBot from "../../assets/chatBot.png";
 import petTraining from "../../assets/petTraining.jpg";
+import petVaccination from "../../assets/petVaccinations.jpg";
+import petHealthRecord from "../../assets/petHealthRecord.jpg";
+import petHealthReports from "../../assets/petHealthReports.jpg";
+import petPersonalProfile from "../../assets/petPersonalProfile.jpg";
+import petHealthChart from "../../assets/petHealthChart.jpg";
+import petAIChatbot from "../../assets/petAIChatbot.png";
+import petPersonalProfile1 from "../../assets/petPersonalProfile1.jpg";
 
 const AppleCarousel = () => {
   const cards = data.map((card, index) => (
@@ -22,22 +29,12 @@ export default AppleCarousel;
 const DummyContent1 = () => {
   return (
     <>
-      {[...new Array(3)].map((_, index) => {
+      {[...new Array(1)].map((_, index) => {
         const sampleData = [
           {
-            text: "Keep a journal, quickly jot down a grocery list, and take amazing class notes. Want to convert those notes to text? No problem.",
-            imgSrc: chatBot,
+            text: "Create a individual personalised Profile for your pets.",
+            imgSrc: petPersonalProfile1,
             imgAlt: "Macbook mockup from Aceternity UI",
-          },
-          {
-            text: "Organize your tasks efficiently and never miss a deadline. Our productivity tools are designed to help you stay on top of your game.",
-            imgSrc: chatBot,
-            imgAlt: "iPad mockup from Aceternity UI",
-          },
-          {
-            text: "Stay connected with your loved ones and manage your social media effortlessly. Our app makes it easy to keep in touch.",
-            imgSrc: chatBot,
-            imgAlt: "iPhone mockup from Aceternity UI",
           },
         ];
 
@@ -48,9 +45,8 @@ const DummyContent1 = () => {
           >
             <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-2xl font-sans max-w-3xl mx-auto">
               <span className="font-bold text-neutral-700 dark:text-neutral-200">
-                The first rule of Apple club is that you boast about Apple club.
+                {sampleData[index].text}
               </span>{" "}
-              {sampleData[index].text}
             </p>
             <img
               src={sampleData[index].imgSrc}
@@ -71,19 +67,19 @@ const DummyContent2 = () => {
       {[...new Array(3)].map((_, index) => {
         const sampleData = [
           {
-            text: "Keep a journal, quickly jot down a grocery list, and take amazing class notes. Want to convert those notes to text? No problem.",
+            text: "Dashboard helps to glance through the trends of vitals of your pets in a graphical representation.",
             imgSrc: petTraining,
             imgAlt: "Macbook mockup from Aceternity UI",
           },
           {
-            text: "Organize your tasks efficiently and never miss a deadline. Our productivity tools are designed to help you stay on top of your game.",
+            text: "Track various vitals like temperature, heart rate, blood pressure and more.",
             imgSrc: petTraining,
-            imgAlt: "iPad mockup from Aceternity UI",
+            imgAlt: "Macbook mockup from Aceternity UI",
           },
           {
-            text: "Stay connected with your loved ones and manage your social media effortlessly. Our app makes it easy to keep in touch.",
+            text: "The Charts are updated after every new report added.",
             imgSrc: petTraining,
-            imgAlt: "iPhone mockup from Aceternity UI",
+            imgAlt: "Macbook mockup from Aceternity UI",
           },
         ];
 
@@ -94,7 +90,7 @@ const DummyContent2 = () => {
           >
             <p className="text-neutral-600 dark:text-neutral-400 text-base md:text-2xl font-sans max-w-3xl mx-auto">
               <span className="font-bold text-neutral-700 dark:text-neutral-200">
-                The first rule of Apple club is that you boast about Apple club.
+                Create a individual personalised Profile for your pets.
               </span>{" "}
               {sampleData[index].text}
             </p>
@@ -114,41 +110,42 @@ const DummyContent2 = () => {
 
 const data = [
   {
-    category: "Artificial Intelligence",
-    title: "You can add multiple pets to your account.",
-    src: chatBot,
+    category: "Personal Profile",
+    title: "Create a individual personalised Profile for your pets.",
+    src: petPersonalProfile,
     content: <DummyContent1 />,
   },
   {
-    category: "Productivity",
+    category: "Ease of Use",
     title:
-      "ChatBot to help you with your pet's health and daily Do's and Dont's.",
-    src: chatBot,
+      "Glance thorugh the trends of vitals of your pets in a graphical representation.",
+    src: petHealthChart,
     content: <DummyContent2 />,
   },
   {
-    category: "Productivity",
-    title: "Add your pet's daily activities.",
-    src: chatBot,
+    category: "Accessibility",
+    title: "Manage your pets Health Reports and access them anytime.",
+    src: petHealthReports,
     content: <DummyContent1 />,
   },
   {
-    category: "Product",
-    title: "Add Medical Reports for your pet.",
-    src: chatBot,
+    category: "Managability",
+    title: "Manage Medical Record for your pets to keep track of pet's health.",
+    src: petHealthRecord,
     content: <DummyContent2 />,
   },
 
   {
     category: "Product",
-    title: "Check trends for vital health parameters for your pet.",
-    src: chatBot,
+    title:
+      "ChatBot curated through AI and multiple pet heathcare books answers all your queries.",
+    src: petAIChatbot,
     content: <DummyContent1 />,
   },
   {
-    category: "iOS",
-    title: "Vaccination record and reminders for your pet.",
-    src: chatBot,
+    category: "Vaccinations",
+    title: "Vaccination record and reminders for your pet and timely updates.",
+    src: petVaccination,
     content: <DummyContent2 />,
   },
 ];

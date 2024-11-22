@@ -15,7 +15,7 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     localStorage.setItem("key", null);
-    navigate("/login");
+    navigate("/");
   };
 
   return (
