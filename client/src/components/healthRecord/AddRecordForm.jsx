@@ -1,14 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
+import useUserAndPetData from "../../hooks/useUserAndPetData";
 
 const AddRecordForm = ({ onSubmit }) => {
-  const [userData, setUserData] = useState(null);
-  const [pets, setPets] = useState([]);
-  const [isLoadingPets, setIsLoadingPets] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
+  const { pets, isLoading } = useUserAndPetData();
   const [formData, setFormData] = useState({
     petId: "",
     ownerInformation: {
@@ -43,51 +40,6 @@ const AddRecordForm = ({ onSubmit }) => {
     },
   });
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("key");
-      if (!token) {
-        console.error("Token not found in local storage");
-        return;
-      }
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/api/users/token/${token}`,
-          { headers: { Authorization: token } }
-        );
-        if (response.data) {
-          setUserData(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    if (userData && userData._id) {
-      const fetchPets = async () => {
-        setIsLoadingPets(true);
-        try {
-          const token = localStorage.getItem("key");
-          const response = await axios.get(
-            `http://localhost:3000/api/pets/owner/${userData._id}`,
-            { headers: { Authorization: token } }
-          );
-          setPets(response.data || []);
-        } catch (error) {
-          console.error("Error fetching pets:", error);
-        } finally {
-          setIsLoadingPets(false);
-        }
-      };
-
-      fetchPets();
-    }
-  }, [userData]);
-
   const handleChange = (section, field, value, index = null) => {
     if (index !== null) {
       setFormData((prev) => ({
@@ -100,13 +52,27 @@ const AddRecordForm = ({ onSubmit }) => {
         },
       }));
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: value,
-        },
-      }));
+      if (section.includes(".")) {
+        const sections = section.split(".");
+        setFormData((prev) => {
+          const updatedSection = {
+            ...prev[sections[0]],
+            [sections[1]]: {
+              ...prev[sections[0]][sections[1]],
+              [field]: value,
+            },
+          };
+          return { ...prev, [sections[0]]: updatedSection };
+        });
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: value,
+          },
+        }));
+      }
     }
   };
 
@@ -122,15 +88,14 @@ const AddRecordForm = ({ onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    // setIsLoading(true);
 
     const { vitalSigns, dateOfCheckup, petId } = formData.checkupInformation;
     const isVitalSignsEmpty = Object.values(vitalSigns).some(
       (value) => value === ""
     );
-    if (isVitalSignsEmpty || !dateOfCheckup || !petId) {
+    if (isVitalSignsEmpty || !dateOfCheckup) {
       toast.error("Please fill in all vital signs and checkup date.");
-      setIsLoading(false);
       return;
     }
 
@@ -138,7 +103,7 @@ const AddRecordForm = ({ onSubmit }) => {
     if (!token) {
       console.error("Token not found in local storage");
       toast.error("Authentication token not found. Please log in again.");
-      setIsLoading(false);
+      // setIsLoading(false);
       return;
     }
     try {
@@ -200,6 +165,7 @@ const AddRecordForm = ({ onSubmit }) => {
                 key={index}
                 type="text"
                 value={item}
+                placeholder={`Enter ${field}`}
                 onChange={(e) =>
                   handleChange("medicalHistory", field, e.target.value, index)
                 }

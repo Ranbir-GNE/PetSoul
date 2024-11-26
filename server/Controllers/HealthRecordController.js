@@ -3,23 +3,32 @@ const VaccinationModel = require("../Models/VaccinationSchema");
 const PetModel = require("../Models/PetSchema");
 
 const addRecord = async (req, res) => {
-  try {
-    const {
-      petId,
-      ownerInformation,
-      reportType,
-      medicalHistory,
-      checkupInformation,
-      additionalFields,
-    } = req.body;
+  const {
+    petId,
+    ownerInformation,
+    presentReports,
+    medicalHistory,
+    checkupInformation,
+    additionalFields,
+  } = req.body;
 
-    const newReport = new HealthRecordModel({
+  if (!petId) {
+    return res.status(400).json({ message: "Pet ID is required" });
+  }
+  const existingRecord = await HealthRecordModel.findOne({ petId: petId });
+  if (existingRecord) {
+    return res
+      .status(400)
+      .json({ message: "Record already exists for this pet" });
+  }
+  try {
+    const newRecord = new HealthRecordModel({
       petId,
       ownerInformation: {
         name: ownerInformation.name,
         contactInformation: ownerInformation.contactInformation,
       },
-      reportType,
+      presentReports,
       medicalHistory: {
         allergies: medicalHistory.allergies,
         medications: medicalHistory.medications,
@@ -31,12 +40,13 @@ const addRecord = async (req, res) => {
       },
       checkupInformation: {
         dateOfCheckup: checkupInformation.dateOfCheckup,
-        weight: checkupInformation.weight,
-        bodyConditionScore: checkupInformation.bodyConditionScore,
         vitalSigns: {
           temperature: checkupInformation.vitalSigns.temperature,
           heartRate: checkupInformation.vitalSigns.heartRate,
           respiratoryRate: checkupInformation.vitalSigns.respiratoryRate,
+          weight: checkupInformation.vitalSigns.weight,
+          bodyConditionScore: checkupInformation.vitalSigns.bodyConditionScore,
+          hydrationStatus: checkupInformation.vitalSigns.hydrationStatus,
         },
         physicalExamFindings: checkupInformation.physicalExamFindings,
         laboratoryResults: checkupInformation.laboratoryResults,
@@ -48,16 +58,16 @@ const addRecord = async (req, res) => {
       },
     });
 
-    const savedReport = await newReport.save();
+    const savedRecord = await newRecord.save();
 
     res.status(201).json({
-      message: "Report added successfully",
-      report: savedReport,
+      message: "Record added successfully",
+      record: savedRecord,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error adding report",
+      message: "Error adding record",
       error: error.message,
     });
   }
@@ -68,19 +78,17 @@ const updateRecord = async (req, res) => {
     const {
       petId,
       ownerInformation,
-      reportType,
       medicalHistory,
       checkupInformation,
       additionalFields,
     } = req.body;
 
-    const updatedReport = {
+    const updateRecordData = {
       petId,
       ownerInformation: {
         name: ownerInformation.name,
         contactInformation: ownerInformation.contactInformation,
       },
-      reportType,
       medicalHistory: {
         allergies: medicalHistory.allergies,
         medications: medicalHistory.medications,
@@ -111,7 +119,7 @@ const updateRecord = async (req, res) => {
 
     const updatedRecord = await HealthRecordModel.findByIdAndUpdate(
       req.params.id,
-      updatedReport,
+      updateRecordData,
       { new: true }
     );
 
@@ -129,10 +137,22 @@ const updateRecord = async (req, res) => {
 };
 
 const deleteRecord = async (req, res) => {
+  const id = req.params.id;
+
+  if (!id) {
+    return res.status(400).json({
+      message: "Invalid or missing ID parameter",
+    });
+  }
+
   try {
-    const deletedRecord = await HealthRecordModel.findByIdAndDelete(
-      req.params.id
-    );
+    const deletedRecord = await HealthRecordModel.findByIdAndDelete(id);
+
+    if (!deletedRecord) {
+      return res.status(404).json({
+        message: "Record not found",
+      });
+    }
 
     res.status(200).json({
       message: "Record deleted successfully",

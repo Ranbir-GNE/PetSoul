@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { Input } from "../ui/input";
 import LoadingButton from "../dashboard/LoadingButton";
 import { toast } from "sonner";
+import useUserAndPetData from "../../hooks/useUserAndPetData";
 
 const vaccinationTypes = ["one-time", "annual", "bi-annual", "tri-annual"];
 const vaccinationNames = [
@@ -56,10 +57,8 @@ const AddVaccinationForm = ({ onSubmit }) => {
     vaccineStatus: "",
   });
 
-  const [userData, setUserData] = useState(null);
-  const [pets, setPets] = useState([]);
+  const { pets } = useUserAndPetData();
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingPets, setIsLoadingPets] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -68,57 +67,6 @@ const AddVaccinationForm = ({ onSubmit }) => {
       [name]: value,
     });
   };
-
-  const fetchUser = async () => {
-    const token = localStorage.getItem("key");
-    if (!token) {
-      console.error("Token not found in local storage");
-      return;
-    }
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/users/token/${token}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-      if (response.data) {
-        setUserData(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
-
-  const fetchPets = async () => {
-    setIsLoadingPets(true);
-    try {
-      const token = localStorage.getItem("key");
-      const response = await axios.get(
-        `http://localhost:3000/api/pets/owner/${userData._id}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-      if (response.data) {
-        setPets(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching pets:", error);
-    } finally {
-      setIsLoadingPets(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    if (userData && userData._id) {
-      fetchPets(userData.id);
-    }
-  }, [userData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

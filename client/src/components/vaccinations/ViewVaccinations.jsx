@@ -3,6 +3,7 @@ import axios from "axios";
 import { FaSearch, FaTimes, FaEdit, FaTrash } from "react-icons/fa";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import useUserAndPetData from "../../hooks/useUserAndPetData";
 
 const Lightbox = ({ vaccination, onClose, onEdit, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -136,58 +137,14 @@ const Lightbox = ({ vaccination, onClose, onEdit, onDelete }) => {
 };
 
 const ViewVaccination = () => {
-  const [userData, setUserData] = useState({});
-  const [pets, setPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [vaccinations, setVaccinations] = useState([]);
   const [selectedVaccination, setSelectedVaccination] = useState(null);
   const [isLoadingPets, setIsLoadingPets] = useState(false);
   const [isLoadingVaccinations, setIsLoadingVaccinations] = useState(false);
 
-  // Fetch user data
-  const fetchUser = async () => {
-    const token = localStorage.getItem("key");
-    if (!token) {
-      console.error("Token not found in local storage");
-      return;
-    }
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/users/token/${token}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-      if (response.data) {
-        setUserData(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
+  const { pets } = useUserAndPetData();
 
-  // Fetch pets data
-  const fetchPets = async (userId) => {
-    setIsLoadingPets(true);
-    try {
-      const token = localStorage.getItem("key");
-      const response = await axios.get(
-        `http://localhost:3000/api/pets/owner/${userId}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-      if (response.data) {
-        setPets(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching pets:", error);
-    } finally {
-      setIsLoadingPets(false);
-    }
-  };
-
-  // Fetch vaccinations for a selected pet
   const fetchPetVaccinations = async (petId) => {
     setIsLoadingVaccinations(true);
     setVaccinations([]);
@@ -255,16 +212,6 @@ const ViewVaccination = () => {
       console.error("Error deleting vaccination:", error.message);
     }
   };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    if (userData._id) {
-      fetchPets(userData._id);
-    }
-  }, [userData]);
 
   return (
     <div className="relative flex flex-col p-4">

@@ -21,9 +21,7 @@ const Dashboard = () => {
             <Grid />
             <Footer />
           </div>
-          <div className="col-span-2">
-             
-          </div>
+          <div className="col-span-2"></div>
         </div>
       </div>
     </div>

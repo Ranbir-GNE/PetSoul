@@ -93,25 +93,25 @@ const Grid = () => {
   }, [pets, tabIndex]);
 
   return (
-    <div className="m-3">
+    <div className="m-3 space-y-6">
       {/* Pets Grid */}
-      <div className="grid grid-cols-5 gap-4 pb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {pets.map((pet, index) => (
           <div
             key={index}
-            className="bg-gray-200 m-3 rounded-lg shadow-md p-3 flex justify-between items-center"
+            className="bg-gray-200 rounded-lg shadow-md p-4 flex items-center justify-between space-x-3"
           >
             <div>
-              <p>Name: {pet.name}</p>
-              <p>Age: {pet.age}</p>
-              <p>Breed: {pet.breed}</p>
-              <p>Species: {pet.species}</p>
+              <p className="text-sm font-medium">Name: {pet.name}</p>
+              <p className="text-sm">Age: {pet.age}</p>
+              <p className="text-sm">Breed: {pet.breed}</p>
+              <p className="text-sm">Species: {pet.species}</p>
             </div>
             <div>
               <img
                 src={pet.profilePicture || "default_pet.jpg"}
                 alt="Pet"
-                className="object-cover h-16 w-16 rounded-full"
+                className="h-16 w-16 object-cover rounded-full"
               />
             </div>
           </div>
@@ -119,9 +119,9 @@ const Grid = () => {
       </div>
 
       {/* Vaccination and Chart Section */}
-      <div className="grid grid-cols-4 gap-4 pb-3">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Chart */}
-        <div className="bg-gray-200 p-4 rounded-lg shadow-md col-span-3">
+        <div className="bg-gray-200 p-4 rounded-lg shadow-md lg:col-span-3">
           <ChartComponent />
         </div>
 
@@ -131,37 +131,43 @@ const Grid = () => {
             selectedIndex={tabIndex}
             onSelect={(index) => setTabIndex(index)}
           >
-            <TabList>
+            <TabList className="flex space-x-2 overflow-x-auto">
               {pets.map((pet, index) => (
-                <Tab key={index}>{pet.name}</Tab>
+                <Tab
+                  key={index}
+                  className="cursor-pointer py-1 px-2 text-sm rounded-lg bg-white shadow-sm text-gray-800"
+                  selectedClassName="bg-blue-500 text-black"
+                >
+                  {pet.name}
+                </Tab>
               ))}
             </TabList>
             {pets.map((pet, index) => (
               <TabPanel key={index}>
-                <div className="flex flex-col p-2 bg-white shadow-md rounded-md">
+                <div className="p-2 bg-white rounded-md space-y-2">
                   {vaccinationData[pet._id] ? (
                     vaccinationData[pet._id].map((record, idx) => (
                       <div
                         key={idx}
-                        className="border p-2 mb-2 rounded-lg bg-gray-50"
+                        className="border p-3 rounded-lg bg-gray-50 space-y-1"
                       >
                         <p className="font-semibold text-gray-800">
                           {record.vaccineName}
                         </p>
-                        <p className="text-gray-600">
+                        <p className="text-gray-600 text-sm">
                           Date:{" "}
                           {new Date(
                             record.vaccinationDate
                           ).toLocaleDateString()}
                         </p>
-                        <p className="text-gray-600">
+                        <p className="text-gray-600 text-sm">
                           Next Due Date:{" "}
                           {new Date(
                             record.nextVaccinationDate
                           ).toLocaleDateString()}
                         </p>
                         <p
-                          className={`font-semibold ${
+                          className={`font-semibold text-sm ${
                             record.vaccineStatus === "completed"
                               ? "text-green-600"
                               : "text-red-600"
@@ -172,7 +178,9 @@ const Grid = () => {
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-600">Loading vaccination data...</p>
+                    <p className="text-gray-600 text-sm">
+                      Loading vaccination data...
+                    </p>
                   )}
                 </div>
               </TabPanel>

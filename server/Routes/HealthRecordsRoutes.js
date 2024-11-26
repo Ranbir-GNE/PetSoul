@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/", addRecord);
 router.put("/:id", updateRecord);
-router.delete("/id", deleteRecord);
+router.delete("/:id", deleteRecord);
 router.get("/:id", getMedicalHistory);
 router.get("/checkup/:id", getCheckupInformation);
 router.get("/vaccination/:id", getVaccinationRecord);

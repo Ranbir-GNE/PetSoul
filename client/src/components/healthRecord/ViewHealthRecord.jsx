@@ -1,58 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaTrash } from "react-icons/fa";
 import { Button } from "../ui/button";
+import useUserAndPetData from "../../hooks/useUserAndPetData";
+import { toast } from "sonner";
+import pet1 from "../../assets/pet1.jpg";
 
 const ViewRecord = () => {
-  const [userData, setUserData] = useState({});
-  const [pets, setPets] = useState([]);
-  const [selectedRecord, setSelectedRecord] = useState(null); // No record selected initially
+  const { pets, isLoading, error } = useUserAndPetData();
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedRecord, setEditedRecord] = useState(null);
 
-  // Fetch user data
-  const fetchUser = async () => {
-    const token = localStorage.getItem("key");
-    if (!token) {
-      console.error("Token not found in local storage");
-      return;
-    }
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/users/token/${token}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-      if (response.data) {
-        setUserData(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
-
-  // Fetch pets data
-  const fetchPets = async (userId) => {
-    try {
-      const token = localStorage.getItem("key");
-      const response = await axios.get(
-        `http://localhost:3000/api/pets/owner/${userId}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-      if (response.data) {
-        setPets(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching pets:", error);
-    }
-  };
-
-  // Fetch a specific pet's health record
   const fetchPetRecord = async (petId) => {
     const token = localStorage.getItem("key");
     if (!token) {
-      console.error("Token not found in local storage");
+      toast.error("Token not found in local storage");
       return;
     }
     try {
@@ -63,6 +26,7 @@ const ViewRecord = () => {
       if (response.data && response.data.records.length > 0) {
         const record = response.data.records[0];
         setSelectedRecord({
+          id: record._id,
           ownerInformation: {
             name: record.ownerInformation?.name || "N/A",
             contactInformation:
@@ -110,206 +74,193 @@ const ViewRecord = () => {
         });
       } else {
         setSelectedRecord(null);
-        console.warn(`No records found for pet with ID: ${petId}`);
+        toast.error(`No records found for pet this pet. ${petId}`);
       }
     } catch (error) {
-      console.error("Error fetching pet data:", error.message);
+      toast.error("Error fetching pet data:", error.message);
     }
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  const handleDeleteRecord = async () => {
+    const token = localStorage.getItem("key");
 
-  useEffect(() => {
-    if (userData._id) {
-      fetchPets(userData._id);
+    if (!selectedRecord.id) {
+      toast.error("Record ID is missing");
+      return;
     }
-  }, [userData]);
 
-  const handlePetClick = (petId) => {
-    fetchPetRecord(petId);
+    try {
+      await axios.delete(
+        `http://localhost:3000/api/healthRecords/${selectedRecord.id}`,
+        { headers: { Authorization: token } }
+      );
+      setSelectedRecord(null);
+      toast.success("Record deleted successfully.");
+    } catch (error) {
+      console.error(
+        "Error deleting record:",
+        error.response?.data || error.message
+      );
+      toast.error(
+        `Failed to delete record: ${error.response?.data?.message || "Unknown error"}`
+      );
+    }
   };
 
   return (
     <div className="relative flex flex-col p-4">
       {/* Pets Section */}
       <div className="flex-1 p-6 bg-white rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Pets</h2>
-        </div>
-        <div className="grid grid-cols-4 gap-6">
-          {pets.map((pet) => (
-            <div
-              key={pet._id}
-              className="flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => handlePetClick(pet._id)}
-            >
-              <img
-                src={pet.profilePicture || "https://via.placeholder.com/150"}
-                alt={`${pet.name}'s profile`}
-                className="w-20 h-20 rounded-full"
-              />
-              <p className="text-lg font-medium">{pet.name}</p>
-              <Button
-                onClick={() => handlePetClick(pet._id)}
-                className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+        <h2 className="text-2xl font-bold mb-6">Pets</h2>
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p>Error: {error}</p>
+        ) : (
+          <div className="grid grid-cols-4 gap-6">
+            {pets.map((pet) => (
+              <div
+                key={pet._id}
+                className="flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => fetchPetRecord(pet._id)}
               >
-                <FaSearch className="inline-block mr-2" />
-                View Record
-              </Button>
-            </div>
-          ))}
-        </div>
+                <img
+                  src={pet.profilePicture || pet1}
+                  alt={`${pet.name}'s profile`}
+                  className="w-20 h-20 rounded-full"
+                />
+                <p className="text-lg font-medium">{pet.name}</p>
+                <Button
+                  onClick={() => fetchPetRecord(pet._id)}
+                  className="text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition"
+                >
+                  <FaSearch className="inline-block mr-2" />
+                  View Record
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Health Record Section */}
       <div className="flex-1 p-6 bg-white rounded-lg shadow-md mt-6">
         <h2 className="text-2xl font-bold mb-4">Health Record</h2>
         {selectedRecord ? (
-          <table className="min-w-full bg-white border">
-            <thead>
-              <tr>
-                <th className="py-2 px-4 border-b">Field</th>
-                <th className="py-2 px-4 border-b">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="py-2 px-4 border-b">Owner Name</td>
-                <td className="py-2 px-4 border-b">
+          <div className="space-y-4">
+            {isEditing ? (
+              <>
+                <input
+                  type="text"
+                  name="ownerInformation.name"
+                  value={editedRecord.ownerInformation.name}
+                  onChange={handleEditChange}
+                  className="p-2 w-full border rounded mb-4"
+                />
+                <textarea
+                  name="medicalHistory.allergies"
+                  value={editedRecord.medicalHistory.allergies}
+                  onChange={handleEditChange}
+                  className="p-2 w-full border rounded mb-4"
+                />
+                <Button
+                  className="bg-blue-500 text-white"
+                  onClick={handleEditRecord}
+                >
+                  Save
+                </Button>
+              </>
+            ) : (
+              <>
+                <p>
+                  <strong>Owner Name:</strong>{" "}
                   {selectedRecord.ownerInformation.name}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Owner Name</td>
-                <td className="py-2 px-4 border-b">
-                  {selectedRecord.ownerInformation.name}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Contact Information</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Owner Email:</strong>{" "}
                   {selectedRecord.ownerInformation.contactInformation}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Allergies</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Allergies:</strong>{" "}
                   {selectedRecord.medicalHistory.allergies}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Medications</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Medications:</strong>{" "}
                   {selectedRecord.medicalHistory.medications}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Vaccinations</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Vaccinations:</strong>{" "}
                   {selectedRecord.medicalHistory.vaccinations}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Surgeries</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Surgeries:</strong>{" "}
                   {selectedRecord.medicalHistory.surgeries}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Illnesses</td>
-                <td className="py-2 px-4 border-b">
-                  {selectedRecord.medicalHistory.illnesses}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Behavioral Issues</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Behavioral Issues:</strong>{" "}
                   {selectedRecord.medicalHistory.behavioralIssues}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Dietary Restrictions</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Dietary Restrictions:</strong>{" "}
                   {selectedRecord.medicalHistory.dietaryRestrictions}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Temperature</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Temperature:</strong>{" "}
                   {selectedRecord.vitalSigns.temperature}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Heart Rate</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Heart Rate:</strong>{" "}
                   {selectedRecord.vitalSigns.heartRate}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Respiratory Rate</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Respiratory Rate:</strong>{" "}
                   {selectedRecord.vitalSigns.respiratoryRate}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Weight</td>
-                <td className="py-2 px-4 border-b">
-                  {selectedRecord.vitalSigns.weight}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Body Condition Score</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Weight:</strong> {selectedRecord.vitalSigns.weight}
+                </p>
+                <p>
+                  <strong>Body Condition Score:</strong>{" "}
                   {selectedRecord.vitalSigns.bodyConditionScore}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Hydration Status</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Hydration Status:</strong>{" "}
                   {selectedRecord.vitalSigns.hydrationStatus}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Date of Checkup</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Date of Checkup:</strong>{" "}
                   {selectedRecord.dateOfCheckup}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Physical Exam Findings</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Physical Exam Findings:</strong>{" "}
                   {selectedRecord.physicalExamFindings}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Laboratory Results</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Laboratory Results:</strong>{" "}
                   {selectedRecord.laboratoryResults}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Diagnostic Tests</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Diagnostic Tests:</strong>{" "}
                   {selectedRecord.diagnosticTests}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Treatment Plan</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Treatment Plan:</strong>{" "}
                   {selectedRecord.treatmentPlan}
-                </td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4 border-b">Behavioral Notes</td>
-                <td className="py-2 px-4 border-b">
+                </p>
+                <p>
+                  <strong>Behavioral Notes:</strong>{" "}
                   {selectedRecord.behavioralNotes}
-                </td>
-              </tr>
-              {/* Additional rows */}
-            </tbody>
-          </table>
+                </p>
+              </>
+            )}
+            <Button
+              className="bg-red-500 text-white"
+              onClick={handleDeleteRecord}
+            >
+              <FaTrash className="mr-2" />
+              Delete Record
+            </Button>
+          </div>
         ) : (
           <p>Select a pet to view its health record.</p>
         )}

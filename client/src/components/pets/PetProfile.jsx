@@ -1,127 +1,68 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { Button } from "../ui/button";
 import pet1 from "../../assets/pet1.jpg"; // Default pet image
 import { toast } from "sonner";
+import useUserAndPetData from "../../hooks/useUserAndPetData"; // Adjust the import path as needed
 
 const ViewRecord = () => {
-  const [userData, setUserData] = useState({});
-  const [pets, setPets] = useState([]);
-  const [selectedRecord, setSelectedRecord] = useState(null);
+  const { pets, isLoading, error, refetchPets } = useUserAndPetData(); // Assuming refetchPets can re-fetch the pets data
   const [selectedPet, setSelectedPet] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedPet, setEditedPet] = useState(null);
 
-  const fetchUser = async () => {
+  const handleEditPet = async () => {
     const token = localStorage.getItem("key");
     if (!token) {
-      console.error("Token not found in local storage");
+      toast.error("Token not found in local storage");
       return;
     }
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/users/token/${token}`,
+      await axios.put(
+        `http://localhost:3000/api/pets/${editedPet._id}`,
+        editedPet,
         { headers: { Authorization: token } }
       );
-      if (response.data) {
-        setUserData(response.data);
-      }
+      toast.success("Pet details updated successfully");
+      setIsEditing(false);
+      refetchPets(); // Refresh the pets list
     } catch (error) {
-      console.error("Error fetching user data:", error.message);
+      console.error("Error editing pet:", error.message);
+      toast.error("Failed to update pet details");
     }
   };
 
-  const fetchPets = async (userId) => {
-    try {
-      const token = localStorage.getItem("key");
-      const response = await axios.get(
-        `http://localhost:3000/api/pets/owner/${userId}`,
-        { headers: { Authorization: token } }
-      );
-      if (response.data) {
-        setPets(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching pets:", error.message);
-    }
-  };
-
-  const fetchPetRecord = async (petId) => {
+  const handleDeletePet = async (petId) => {
     const token = localStorage.getItem("key");
     if (!token) {
-      console.error("Token not found in local storage");
+      toast.error("Token not found in local storage");
       return;
     }
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/pets/records/${petId}`,
-        { headers: { Authorization: token } }
-      );
-      if (response.data && response.data.records.length > 0) {
-        const record = response.data.records[0];
-        setSelectedRecord({
-          ownerInformation: {
-            name: record.ownerInformation?.name || "N/A",
-            contactInformation:
-              record.ownerInformation?.contactInformation || "N/A",
-          },
-          medicalHistory: {
-            allergies: (record.medicalHistory?.allergies || []).join(", "),
-            medications: (record.medicalHistory?.medications || []).join(", "),
-            vaccinations: (record.medicalHistory?.vaccinations || []).join(
-              ", "
-            ),
-            surgeries: (record.medicalHistory?.surgeries || []).join(", "),
-            illnesses: (record.medicalHistory?.illnesses || []).join(", "),
-            behavioralIssues: (
-              record.medicalHistory?.behavioralIssues || []
-            ).join(", "),
-            dietaryRestrictions: (
-              record.medicalHistory?.dietaryRestrictions || []
-            ).join(", "),
-          },
-          vitalSigns: {
-            temperature:
-              record.checkupInformation?.vitalSigns?.temperature || "N/A",
-            heartRate:
-              record.checkupInformation?.vitalSigns?.heartRate || "N/A",
-            respiratoryRate:
-              record.checkupInformation?.vitalSigns?.respiratoryRate || "N/A",
-            weight: record.checkupInformation?.vitalSigns?.weight || "N/A",
-            bodyConditionScore:
-              record.checkupInformation?.vitalSigns?.bodyConditionScore ||
-              "N/A",
-            hydrationStatus:
-              record.checkupInformation?.vitalSigns?.hydrationStatus || "N/A",
-          },
-          dateOfCheckup: record.checkupInformation?.dateOfCheckup || "N/A",
-          physicalExamFindings:
-            record.checkupInformation?.physicalExamFindings || "N/A",
-          laboratoryResults:
-            record.checkupInformation?.laboratoryResults || "N/A",
-          diagnosticTests: record.checkupInformation?.diagnosticTests || "N/A",
-          treatmentPlan: record.checkupInformation?.treatmentPlan || "N/A",
-          behavioralNotes: (
-            record.additionalFields?.behavioralNotes || []
-          ).join(", "),
-        });
-        setSelectedPet(petId);
-      } else {
-        setSelectedRecord(null);
-        toast.error("No records found for this pet");
-      }
+      await axios.delete(`http://localhost:3000/api/pets/${petId}`, {
+        headers: { Authorization: token },
+      });
+      toast.success("Pet deleted successfully");
+      setSelectedPet(null);
+      refetchPets(); // Refresh the pets list
     } catch (error) {
-      console.error("Error fetching pet record:", error.message);
+      console.error("Error deleting pet:", error.message);
+      toast.error("Failed to delete pet");
     }
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditedPet((prev) => ({ ...prev, [name]: value }));
+  };
 
-  useEffect(() => {
-    if (userData._id) {
-      fetchPets(userData._id);
-    }
-  }, [userData]);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="p-4">
@@ -131,7 +72,10 @@ const ViewRecord = () => {
           <div
             key={pet._id}
             className="bg-white shadow-md rounded-lg p-4 cursor-pointer"
-            onClick={() => fetchPetRecord(pet._id)}
+            onClick={() => {
+              setSelectedPet(pet);
+              setEditedPet(pet); // Initialize the edit form with pet details
+            }}
           >
             <div className="flex justify-center mb-4">
               <img
@@ -150,135 +94,101 @@ const ViewRecord = () => {
         ))}
       </div>
 
-      {selectedRecord && (
+      {selectedPet && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 w-full max-w-lg rounded-lg shadow-lg relative">
             <Button
-              onClick={() => setSelectedRecord(null)}
+              onClick={() => {
+                setSelectedPet(null);
+                setIsEditing(false);
+              }}
               className="absolute top-2 right-2 bg-red-500 text-white"
             >
               Close
             </Button>
-            <h3 className="text-2xl font-bold mb-2">
-              Health Record: {pets.find((pet) => pet._id === selectedPet)?.name}
-            </h3>
-            <div>
-              <div className="grid grid-cols-2">
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Owner Name: {selectedRecord.ownerInformation.name}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Contact Information:{" "}
-                    {selectedRecord.ownerInformation.contactInformation}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Allergies: {selectedRecord.medicalHistory.allergies}{" "}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Medications: {selectedRecord.medicalHistory.medications}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Vaccinations: {selectedRecord.medicalHistory.vaccinations}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Surgeries: {selectedRecord.medicalHistory.surgeries}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Illnesses: {selectedRecord.medicalHistory.illnesses}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Behavioral Issues:{" "}
-                    {selectedRecord.medicalHistory.behavioralIssues}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Dietary Restrictions:{" "}
-                    {selectedRecord.medicalHistory.dietaryRestrictions}
-                  </p>
-                </div>
-                <div>
-                  <p className="py-2 px-4 border-b">
-                    Temperature: {selectedRecord.vitalSigns.temperature}
-                  </p>
-                </div>
-                <div>
-                  <p className="py-2 px-4 border-b">
-                    Heart Rate: {selectedRecord.vitalSigns.heartRate}
-                  </p>
-                </div>
-                <div>
-                  <p className="py-2 px-4 border-b">
-                    Respiratory Rate:{" "}
-                    {selectedRecord.vitalSigns.respiratoryRate}
-                  </p>
-                </div>
-                <div>
-                  <p className="py-2 px-4 border-b">
-                    Weight: {selectedRecord.vitalSigns.weight}
-                  </p>
-                </div>
-                <div>
-                  <p className="py-2 px-4 border-b">
-                    Body Condition Score:{" "}
-                    {selectedRecord.vitalSigns.bodyConditionScore}
-                  </p>
-                </div>
-                <div>
-                  <p className="py-2 px-4 border-b">
-                    Hydration Status:{" "}
-                    {selectedRecord.vitalSigns.hydrationStatus}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Date of Checkup: {selectedRecord.dateOfCheckup}
-                  </p>
-                </div>
-
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Physical Exam Findings:{" "}
-                    {selectedRecord.physicalExamFindings}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Laboratory Results: {selectedRecord.laboratoryResults}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Diagnostic Tests: {selectedRecord.diagnosticTests}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Treatment Plan: {selectedRecord.treatmentPlan}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <p className="py-2 px-4 border-b">
-                    Behavioral Notes: {selectedRecord.behavioralNotes}
-                  </p>
+            <h3 className="text-2xl font-bold mb-4">Pet Profile</h3>
+            {isEditing ? (
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  name="name"
+                  value={editedPet.name}
+                  onChange={handleEditChange}
+                  className="w-full p-2 border rounded"
+                  placeholder="Pet Name"
+                />
+                <input
+                  type="number"
+                  name="age"
+                  value={editedPet.age}
+                  onChange={handleEditChange}
+                  className="w-full p-2 border rounded"
+                  placeholder="Pet Age"
+                />
+                <input
+                  type="text"
+                  name="breed"
+                  value={editedPet.breed}
+                  onChange={handleEditChange}
+                  className="w-full p-2 border rounded"
+                  placeholder="Pet Breed"
+                />
+                <select
+                  name="species"
+                  value={editedPet.species}
+                  onChange={handleEditChange}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="">Select Species</option>
+                  <option value="Dog">Dog</option>
+                  <option value="Cat">Cat</option>
+                  <option value="Bird">Bird</option>
+                  <option value="Fish">Fish</option>
+                  <option value="Other">Other</option>
+                </select>
+                <Button
+                  onClick={handleEditPet}
+                  className="bg-blue-500 text-white"
+                >
+                  Save
+                </Button>
+                <Button
+                  onClick={() => setIsEditing(false)}
+                  className="bg-gray-500 text-white"
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="text-left space-y-4">
+                <p>
+                  <strong>Name:</strong> {selectedPet.name}
+                </p>
+                <p>
+                  <strong>Age:</strong> {selectedPet.age} years
+                </p>
+                <p>
+                  <strong>Breed:</strong> {selectedPet.breed}
+                </p>
+                <p>
+                  <strong>Species:</strong> {selectedPet.species}
+                </p>
+                <div className="flex space-x-4">
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    className="bg-blue-500 text-white"
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    onClick={() => handleDeletePet(selectedPet._id)}
+                    className="bg-red-500 text-white"
+                  >
+                    Delete
+                  </Button>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}

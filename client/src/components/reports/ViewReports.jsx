@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { Button } from "../ui/button";
+import useUserAndPetData from "../../hooks/useUserAndPetData"; // Adjust the import path as necessary
 
 const Lightbox = ({ report, onClose }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -53,56 +54,11 @@ const Lightbox = ({ report, onClose }) => (
 );
 
 const ViewReports = () => {
-  const [userData, setUserData] = useState({});
-  const [pets, setPets] = useState([]);
+  const { userData, pets, isLoading, error } = useUserAndPetData();
   const [selectedPetId, setSelectedPetId] = useState(null);
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
-  const [isLoadingPets, setIsLoadingPets] = useState(false);
   const [isLoadingReports, setIsLoadingReports] = useState(false);
-
-  // Fetch user data
-  const fetchUser = async () => {
-    const token = localStorage.getItem("key");
-    if (!token) {
-      console.error("Token not found in local storage");
-      return;
-    }
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/users/token/${token}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-      if (response.data) {
-        setUserData(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
-
-  // Fetch pets data
-  const fetchPets = async (userId) => {
-    setIsLoadingPets(true);
-    try {
-      const token = localStorage.getItem("key");
-      const response = await axios.get(
-        `http://localhost:3000/api/pets/owner/${userId}`,
-        {
-          headers: { Authorization: token },
-        }
-      );
-      if (response.data) {
-        setPets(response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching pets:", error);
-    } finally {
-      setIsLoadingPets(false);
-    }
-  };
 
   // Fetch reports for a selected pet
   const fetchPetReports = async (petId) => {
@@ -131,16 +87,6 @@ const ViewReports = () => {
     }
   };
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  useEffect(() => {
-    if (userData._id) {
-      fetchPets(userData._id);
-    }
-  }, [userData]);
-
   const handlePetClick = (petId) => {
     setSelectedPetId(petId);
     fetchPetReports(petId);
@@ -161,8 +107,10 @@ const ViewReports = () => {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Pets</h2>
         </div>
-        {isLoadingPets ? (
+        {isLoading ? (
           <p>Loading pets...</p>
+        ) : error ? (
+          <p>Error: {error}</p>
         ) : (
           <div className="grid grid-cols-4 gap-6">
             {pets.map((pet) => (
