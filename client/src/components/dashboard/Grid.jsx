@@ -4,6 +4,7 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import ChartComponent from "./ChartComponent";
 import userPetContext from "../../context/UserPetContext";
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
 
 const Grid = () => {
   const [userData, setUserData] = useState();
@@ -12,22 +13,20 @@ const Grid = () => {
   const userPetData = useContext(userPetContext);
   const [tabIndex, setTabIndex] = useState(0);
 
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem("key");
-    if (!token) {
-      console.error("Token not found in local storage");
-      return;
-    }
+    if (!token) return;
+
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/users/token/${token}`,
-        { headers: { Authorization: token } }
-      );
-      setUserData(response.data);
+      const { data } = await axios.get(`${API_BASE}/users/token/${token}`, {
+        headers: { Authorization: token },
+      });
+      setUserData(data);
     } catch (error) {
       console.error("Error fetching user data:", error.message);
     }
-  };
+  }, []);
+
 
   const fetchPets = async () => {
     const token = localStorage.getItem("key");
@@ -39,7 +38,7 @@ const Grid = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/pets/owner/${userId}`,
+        `${API_BASE}/api/pets/owner/${userId}`,
         { headers: { Authorization: token } }
       );
       if (response.data.length === 0) {
@@ -61,7 +60,7 @@ const Grid = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/healthRecords/vaccination/${petId}`,
+        `${API_BASE}/api/healthRecords/vaccination/${petId}`,
         { headers: { Authorization: token } }
       );
       setVaccinationData((prevData) => ({
@@ -81,10 +80,11 @@ const Grid = () => {
   }, []);
 
   useEffect(() => {
-    if (userData) {
+    if (userData?._id) {
       fetchPets();
     }
-  }, [userData]);
+  }, [userData?._id]);
+
 
   useEffect(() => {
     if (pets.length > 0 && pets[tabIndex]) {
@@ -167,11 +167,10 @@ const Grid = () => {
                           ).toLocaleDateString()}
                         </p>
                         <p
-                          className={`font-semibold text-sm ${
-                            record.vaccineStatus === "completed"
-                              ? "text-green-600"
-                              : "text-red-600"
-                          }`}
+                          className={`font-semibold text-sm ${record.vaccineStatus === "completed"
+                            ? "text-green-600"
+                            : "text-red-600"
+                            }`}
                         >
                           Status: {record.vaccineStatus}
                         </p>
