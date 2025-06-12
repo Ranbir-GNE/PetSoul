@@ -1,15 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import ChartComponent from "./ChartComponent";
 import userPetContext from "../../context/UserPetContext";
 const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
+import defaultPet from "../../assets/cat.jpg"; // create this if not present
 
 const Grid = () => {
   const [userData, setUserData] = useState();
   const [pets, setPets] = useState([]);
   const [vaccinationData, setVaccinationData] = useState({});
+  const [fetchedPetIds, setFetchedPetIds] = useState(new Set());
   const userPetData = useContext(userPetContext);
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -18,15 +20,14 @@ const Grid = () => {
     if (!token) return;
 
     try {
-      const { data } = await axios.get(`${API_BASE}/users/token/${token}`, {
-        headers: { Authorization: token },
+      const { data } = await axios.get(`${API_BASE}/api/users/token/${token}`, {
+        headers: { Authorization: token }
       });
       setUserData(data);
     } catch (error) {
       console.error("Error fetching user data:", error.message);
     }
   }, []);
-
 
   const fetchPets = async () => {
     const token = localStorage.getItem("key");
@@ -53,6 +54,8 @@ const Grid = () => {
   };
 
   const fetchVaccinationData = async (petId) => {
+    if (fetchedPetIds.has(petId)) return;
+
     const token = localStorage.getItem("key");
     if (!token || !petId) {
       console.error("Missing token or petId");
@@ -67,24 +70,21 @@ const Grid = () => {
         ...prevData,
         [petId]: response.data.vaccinationRecord,
       }));
+      setFetchedPetIds((prev) => new Set(prev).add(petId));
     } catch (error) {
       console.error("Error fetching vaccination data:", error.message);
     }
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchUserData();
-    };
-    fetchData();
-  }, []);
+    fetchUserData();
+  }, [fetchUserData]);
 
   useEffect(() => {
     if (userData?._id) {
       fetchPets();
     }
   }, [userData?._id]);
-
 
   useEffect(() => {
     if (pets.length > 0 && pets[tabIndex]) {
@@ -109,7 +109,7 @@ const Grid = () => {
             </div>
             <div>
               <img
-                src={pet.profilePicture || "default_pet.jpg"}
+                src={pet.profilePicture || defaultPet}
                 alt="Pet"
                 className="h-16 w-16 object-cover rounded-full"
               />
@@ -135,8 +135,10 @@ const Grid = () => {
               {pets.map((pet, index) => (
                 <Tab
                   key={index}
-                  className="cursor-pointer py-1 px-2 text-sm rounded-lg bg-white shadow-sm text-gray-800"
-                  selectedClassName="bg-blue-500 text-black"
+                  className={({ selected }) =>
+                    `cursor-pointer py-1 px-2 text-sm rounded-lg shadow-sm transition ${selected ? "bg-blue-500 text-white" : "bg-white text-gray-800"
+                    }`
+                  }
                 >
                   {pet.name}
                 </Tab>
@@ -145,7 +147,7 @@ const Grid = () => {
             {pets.map((pet, index) => (
               <TabPanel key={index}>
                 <div className="p-2 bg-white rounded-md space-y-2">
-                  {vaccinationData[pet._id] ? (
+                  {vaccinationData[pet._id]?.length ? (
                     vaccinationData[pet._id].map((record, idx) => (
                       <div
                         key={idx}
@@ -177,9 +179,7 @@ const Grid = () => {
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-600 text-sm">
-                      Loading vaccination data...
-                    </p>
+                    <p className="text-gray-500">No vaccination records found.</p>
                   )}
                 </div>
               </TabPanel>

@@ -3,9 +3,13 @@ import axios from "axios";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
 import useUserAndPetData from "../../hooks/useUserAndPetData";
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
+
 
 const AddRecordForm = ({ onSubmit }) => {
   const { pets, isLoading } = useUserAndPetData();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     petId: "",
     ownerInformation: {
@@ -40,6 +44,17 @@ const AddRecordForm = ({ onSubmit }) => {
     },
   });
 
+  function setNestedValue(obj, path, value) {
+    const keys = path.split(".");
+    let temp = obj;
+    keys.slice(0, -1).forEach((key) => {
+      if (!temp[key]) temp[key] = {};
+      temp = temp[key];
+    });
+    temp[keys[keys.length - 1]] = value;
+    return { ...obj };
+  }
+
   const handleChange = (section, field, value, index = null) => {
     if (index !== null) {
       setFormData((prev) => ({
@@ -51,28 +66,16 @@ const AddRecordForm = ({ onSubmit }) => {
           ),
         },
       }));
+    } else if (section.includes(".")) {
+      setFormData((prev) => setNestedValue(prev, `${section}.${field}`, value));
     } else {
-      if (section.includes(".")) {
-        const sections = section.split(".");
-        setFormData((prev) => {
-          const updatedSection = {
-            ...prev[sections[0]],
-            [sections[1]]: {
-              ...prev[sections[0]][sections[1]],
-              [field]: value,
-            },
-          };
-          return { ...prev, [sections[0]]: updatedSection };
-        });
-      } else {
-        setFormData((prev) => ({
-          ...prev,
-          [section]: {
-            ...prev[section],
-            [field]: value,
-          },
-        }));
-      }
+      setFormData((prev) => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value,
+        },
+      }));
     }
   };
 
@@ -88,9 +91,10 @@ const AddRecordForm = ({ onSubmit }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // setIsLoading(true);
+    setIsSubmitting(true);
 
-    const { vitalSigns, dateOfCheckup, petId } = formData.checkupInformation;
+    const { vitalSigns, dateOfCheckup } = formData.checkupInformation;
+    const { petId } = formData;
     const isVitalSignsEmpty = Object.values(vitalSigns).some(
       (value) => value === ""
     );
@@ -108,7 +112,7 @@ const AddRecordForm = ({ onSubmit }) => {
     }
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/healthRecords",
+        `${API_BASE}/api/healthRecords`,
         formData,
         { headers: { Authorization: token } }
       );
@@ -119,10 +123,10 @@ const AddRecordForm = ({ onSubmit }) => {
         }
       }
     } catch (err) {
-      console.error("Error adding health record:", err);
-      toast.error("Failed to add health record. Please try again.");
+      console.error("Error fetching pet data:", error);
+      toast.error(`Error fetching pet record: ${error.response?.data?.message || error.message}`);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(true);
     }
   };
 
@@ -251,9 +255,10 @@ const AddRecordForm = ({ onSubmit }) => {
 
       <button
         type="submit"
-        className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none"
+        disabled={isSubmitting}
+        className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-500 disabled:opacity-50"
       >
-        Submit Health Record
+        {isSubmitting ? "Submitting..." : "Submit Health Record"}
       </button>
     </form>
   );

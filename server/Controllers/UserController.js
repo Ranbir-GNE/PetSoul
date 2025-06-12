@@ -113,7 +113,7 @@ const deleteUser = async (req, res) => {
 };
 
 const getUserFromToken = async (req, res) => {
-  const token = req.params.token;
+  const token = req.headers.authorization ;
   if (!token) {
     return res.status(401).json({ message: "Token Not Found" });
   }

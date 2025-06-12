@@ -1,9 +1,57 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Input } from "../ui/input";
 import LoadingButton from "../dashboard/LoadingButton";
 import axios from "axios";
 import { toast } from "sonner";
 import useUserAndPetData from "../../hooks/useUserAndPetData";
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
+
+// Reusable input group component
+const InputGroup = ({ sectionName, data, onChange, columns = 2 }) => (
+  <div className={`grid grid-cols-${columns} gap-3`}>
+    {Object.entries(data).map(([key, value]) => (
+      <div key={key} className="mt-2">
+        <label className="block text-sm text-gray-600 capitalize">
+          {key}
+        </label>
+        <Input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(sectionName, key, e.target.value)}
+        />
+      </div>
+    ))}
+  </div>
+);
+
+// Section components
+const VitalSignsForm = ({ data, onChange }) => (
+  <>
+    <h3 className="text-lg font-semibold">Vital Signs</h3>
+    <InputGroup sectionName="vitalSigns" data={data} onChange={onChange} columns={3} />
+  </>
+);
+
+const PhysicalExamForm = ({ data, onChange }) => (
+  <>
+    <h3 className="text-lg font-semibold">Physical Examination</h3>
+    <InputGroup sectionName="physicalExamination" data={data} onChange={onChange} columns={3} />
+  </>
+);
+
+const LaboratoryTestsForm = ({ data, onChange }) => (
+  <>
+    <h3 className="text-lg font-semibold">Laboratory Tests</h3>
+    <InputGroup sectionName="laboratoryTests" data={data} onChange={onChange} columns={2} />
+  </>
+);
+
+const AdditionalTestsForm = ({ data, onChange }) => (
+  <>
+    <h3 className="text-lg font-semibold">Additional Tests</h3>
+    <InputGroup sectionName="additionalTests" data={data} onChange={onChange} columns={2} />
+  </>
+);
 
 const AddReportForm = ({ onSubmit }) => {
   const { pets } = useUserAndPetData();
@@ -46,7 +94,7 @@ const AddReportForm = ({ onSubmit }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (section, field, value) => {
+  const handleChange = useCallback((section, field, value) => {
     setFormData((prev) => ({
       ...prev,
       [section]: {
@@ -54,62 +102,53 @@ const AddReportForm = ({ onSubmit }) => {
         [field]: value,
       },
     }));
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
-    if (!formData.petId) {
-      toast.error("Please select a pet.");
-      return;
-    }
+    const errors = [];
+    if (!formData.petId) errors.push("pet");
+    if (Object.values(formData.vitalSigns).some((v) => !v)) errors.push("vital signs");
+    if (Object.values(formData.physicalExamination).some((v) => !v)) errors.push("physical examination");
+    if (Object.values(formData.laboratoryTests).some((v) => !v)) errors.push("laboratory tests");
 
-    const isVitalSignsEmpty = Object.values(formData.vitalSigns).some(
-      (value) => !value
-    );
-    if (isVitalSignsEmpty) {
-      toast.error("Please fill out all vital signs.");
-      return;
-    }
-
-    const isPhysicalExaminationEmpty = Object.values(
-      formData.physicalExamination
-    ).some((value) => !value);
-    if (isPhysicalExaminationEmpty) {
-      toast.error("Please fill out all physical examination fields.");
-      return;
-    }
-
-    const isLaboratoryTestsEmpty = Object.values(formData.laboratoryTests).some(
-      (value) => !value
-    );
-    if (isLaboratoryTestsEmpty) {
-      toast.error("Please fill out all laboratory tests.");
+    if (errors.length > 0) {
+      toast.error(`Please fill out the following: ${errors.join(", ")}.`);
       return;
     }
 
     setIsLoading(true);
     const token = localStorage.getItem("key");
     if (!token) {
-      console.error("Token not found in local storage");
+      toast.error("Authentication token not found.");
+      setIsLoading(false);
       return;
     }
+
+    // Only send non-empty additionalTests fields
+    const payload = {
+      ...formData,
+      additionalTests: Object.fromEntries(
+        Object.entries(formData.additionalTests).filter(([, val]) => val)
+      ),
+    };
+
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/reports",
-        formData,
+        `${API_BASE}/api/reports`,
+        payload,
         {
           headers: { Authorization: token },
         }
       );
       if (response) {
-        console.log(response.data, "Report Added Successfully");
         toast.success("Report Added Successfully");
         onSubmit && onSubmit(response.data);
       }
     } catch (err) {
       console.error("Error adding report:", err);
+      toast.error("Failed to add report.");
     } finally {
       setIsLoading(false);
     }
@@ -155,92 +194,25 @@ const AddReportForm = ({ onSubmit }) => {
           ))}
         </select>
 
-        <h3 className="text-lg font-semibold">Vital Signs</h3>
-        <div className="grid grid-cols-3 gap-3">
-          {Object.keys(formData.vitalSigns).map((field) => (
-            <div key={field} className="mt-2">
-              <label className="block text-sm text-gray-600 capitalize">
-                {field}
-              </label>
-              <Input
-                type="text"
-                value={formData.vitalSigns[field]}
-                onChange={(e) =>
-                  handleChange("vitalSigns", field, e.target.value)
-                }
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          ))}
-        </div>
+        <VitalSignsForm data={formData.vitalSigns} onChange={handleChange} />
       </div>
 
       <div className="mb-6">
-        <h3 className="text-lg font-semibold">Physical Examination</h3>
-        <div className="grid grid-cols-3 gap-3">
-          {Object.keys(formData.physicalExamination).map((field) => (
-            <div key={field} className="mt-2">
-              <label className="block text-sm text-gray-600 capitalize">
-                {field}
-              </label>
-              <Input
-                type="text"
-                value={formData.physicalExamination[field]}
-                onChange={(e) =>
-                  handleChange("physicalExamination", field, e.target.value)
-                }
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          ))}
-        </div>
+        <PhysicalExamForm data={formData.physicalExamination} onChange={handleChange} />
       </div>
 
       <div className="mb-6">
-        <h3 className="text-lg font-semibold">Laboratory Tests</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {Object.keys(formData.laboratoryTests).map((field) => (
-            <div key={field} className="mt-2">
-              <label className="block text-sm text-gray-600 capitalize">
-                {field}
-              </label>
-              <Input
-                type="text"
-                value={formData.laboratoryTests[field]}
-                onChange={(e) =>
-                  handleChange("laboratoryTests", field, e.target.value)
-                }
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          ))}
-        </div>
+        <LaboratoryTestsForm data={formData.laboratoryTests} onChange={handleChange} />
       </div>
 
       <div className="mb-6">
-        <h3 className="text-lg font-semibold">Additional Tests</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {Object.keys(formData.additionalTests).map((field) => (
-            <div key={field} className="mt-2">
-              <label className="block text-sm text-gray-600 capitalize">
-                {field}
-              </label>
-              <Input
-                type="text"
-                value={formData.additionalTests[field]}
-                onChange={(e) =>
-                  handleChange("additionalTests", field, e.target.value)
-                }
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-          ))}
-        </div>
+        <AdditionalTestsForm data={formData.additionalTests} onChange={handleChange} />
       </div>
 
       <LoadingButton
         type="submit"
         isLoading={isLoading}
+        disabled={isLoading}
         className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none"
       >
         Submit Report

@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   FaTachometerAlt,
   FaDog,
@@ -10,16 +10,25 @@ import {
   FaSignOutAlt,
 } from "react-icons/fa";
 
-const Sidebar = () => {
+const Sidebar = ({ closeSidebar }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
-    localStorage.setItem("key", null);
     navigate("/");
+    localStorage.removeItem("key");
   };
 
+  const navItems = [
+    { path: "/dashboard", label: "Dashboard", icon: <FaTachometerAlt /> },
+    { path: "/pets", label: "Pets", icon: <FaDog /> },
+    { path: "/record", label: "Health Records", icon: <FaNotesMedical /> },
+    { path: "/reports", label: "Reports", icon: <FaFileAlt /> },
+    { path: "/vaccination", label: "Vaccinations", icon: <FaSyringe /> },
+  ];
+
   return (
-    <div className="flex flex-col h-full bg-gray-900 text-white shadow-lg">
+    <div className="flex flex-col h-full bg-gray-900 text-white shadow-lg w-64">
       {/* Logo / Header */}
       <div className="flex items-center justify-center p-4 bg-gray-800 border-b border-gray-700">
         <h1 className="text-xl font-bold text-blue-400">Pet Care</h1>
@@ -28,41 +37,22 @@ const Sidebar = () => {
       {/* Navigation Links */}
       <div className="flex-1 p-4">
         <ul className="space-y-4">
-          <li
-            className="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-800 cursor-pointer transition"
-            onClick={() => navigate("/dashboard")}
-          >
-            <FaTachometerAlt className="text-blue-400" />
-            <span>Dashboard</span>
-          </li>
-          <li
-            className="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-800 cursor-pointer transition"
-            onClick={() => navigate("/pets")}
-          >
-            <FaDog className="text-blue-400" />
-            <span>Pets</span>
-          </li>
-          <li
-            className="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-800 cursor-pointer transition"
-            onClick={() => navigate("/record")}
-          >
-            <FaNotesMedical className="text-blue-400" />
-            <span>Health Records</span>
-          </li>
-          <li
-            className="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-800 cursor-pointer transition"
-            onClick={() => navigate("/reports")}
-          >
-            <FaFileAlt className="text-blue-400" />
-            <span>Reports</span>
-          </li>
-          <li
-            className="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-800 cursor-pointer transition"
-            onClick={() => navigate("/vaccination")}
-          >
-            <FaSyringe className="text-blue-400" />
-            <span>Vaccinations</span>
-          </li>
+          {navItems.map((item) => (
+            <li
+              key={item.path}
+              className={`flex items-center space-x-3 py-2 px-4 rounded-lg cursor-pointer transition ${location.pathname === item.path
+                ? "bg-gray-800"
+                : "hover:bg-gray-800"
+                }`}
+              onClick={() => {
+                navigate(item.path);
+                closeSidebar?.();
+              }}
+            >
+              <span className="text-blue-400">{item.icon}</span>
+              <span>{item.label}</span>
+            </li>
+          ))}
         </ul>
       </div>
 
@@ -70,8 +60,14 @@ const Sidebar = () => {
       <div className="p-4 border-t border-gray-700">
         <ul className="space-y-4">
           <li
-            className="flex items-center space-x-3 py-2 px-4 rounded-lg hover:bg-gray-800 cursor-pointer transition"
-            onClick={() => navigate("/profile")}
+            className={`flex items-center space-x-3 py-2 px-4 rounded-lg cursor-pointer transition ${location.pathname === "/profile"
+              ? "bg-gray-800"
+              : "hover:bg-gray-800"
+              }`}
+            onClick={() => {
+              navigate("/profile");
+              closeSidebar?.();
+            }}
           >
             <FaUser className="text-blue-400" />
             <span>Profile</span>

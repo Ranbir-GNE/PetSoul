@@ -15,6 +15,8 @@ import {
 } from "chart.js";
 import axios from "axios";
 import LoadingSpinner from "./LoadingSpinner";
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
+
 
 ChartJS.register(
   CategoryScale,
@@ -33,57 +35,68 @@ const ChartComponent = () => {
 
   const fetchCheckupData = async () => {
     setLoading(true);
-    const token = localStorage.getItem("key");
-    if (!token) {
-      console.error("Token not found in local storage");
-      setLoading(false);
-      return;
-    }
-
     try {
-      const fetchedData = [];
+      const token = localStorage.getItem("key");
+      if (!token) {
+        console.error("Token not found in local storage");
+        setLoading(false);
+        return;
+      }
 
-      const requests = userPetData.pets.map(async (pet) => {
-        try {
-          const response = await axios.get(
-            `http://localhost:3000/api/healthRecords/checkup/${pet._id}`,
-            { headers: { Authorization: token } }
-          );
+      // Use Promise.all to collect results without mutating state in a loop
+      const results = await Promise.all(
+        userPetData.pets.map(async (pet) => {
+          try {
+            const response = await axios.get(
+              `${API_BASE}/api/healthRecords/checkup/${pet._id}`,
+              { headers: { Authorization: token } }
+            );
 
-          if (!response.data.checkupInformation) {
-            console.warn(`No checkup information for pet ID: ${pet._id}`);
+            if (!response.data.checkupInformation) {
+              console.warn(`No checkup information for pet ID: ${pet._id}`);
+              return null;
+            }
+
+            return {
+              petId: pet._id,
+              checkupInfo: response.data.checkupInformation,
+              petInfo: response.data.petInfo,
+            };
+          } catch (error) {
+            console.error(
+              `Error fetching checkup data for pet ID ${pet._id}:`,
+              error.message
+            );
             return null;
           }
+        })
+      );
 
-          fetchedData.push({
-            petId: pet._id,
-            checkupInfo: response.data.checkupInformation,
-            petInfo: response.data.petInfo,
-          });
-        } catch (error) {
-          console.error(
-            `Error fetching checkup data for pet ID ${pet._id}:`,
-            error.message
-          );
-          return null;
-        }
-      });
-
-      await Promise.all(requests);
-
-      setCheckupData(fetchedData);
+      // Filter out nulls
+      setCheckupData(results.filter(Boolean));
     } catch (error) {
       console.error("Error fetching checkup data:", error.message);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
     if (userPetData.pets.length > 0) {
       fetchCheckupData();
     }
   }, [userPetData.pets]);
+
+  const chartOptions = (label) => ({
+      responsive: true,
+      plugins: {
+        legend: { display: true, position: "top" },
+        title: { display: true, text: label },
+      },
+      scales: {
+        y: { beginAtZero: true },
+      },
+    });
 
   const createChartData = (label, dataPoints, dates) => {
     const chartColors = {
@@ -137,7 +150,7 @@ const ChartComponent = () => {
           {checkupData.map((data, index) => (
             <TabPanel key={index}>
               {Array.isArray(data.checkupInfo) &&
-              data.checkupInfo.length > 0 ? (
+                data.checkupInfo.length > 0 ? (
                 data.checkupInfo.map((checkup, checkupIndex) => {
                   const vitalSigns = checkup.checkupInformation.vitalSigns;
                   const dates = checkup.checkupInformation.dateOfCheckup;
@@ -169,43 +182,32 @@ const ChartComponent = () => {
                       {temperature.length > 0 && (
                         <div className="mb-4">
                           <Line
-                            data={createChartData(
-                              "Temperature",
-                              temperature,
-                              dates
-                            )}
+                            data={createChartData("Temperature", temperature, dates)}
+                            options={chartOptions("Temperature")}
                           />
                         </div>
                       )}
-
                       {heartRate.length > 0 && (
                         <div className="mb-4">
                           <Line
-                            data={createChartData(
-                              "Heart Rate",
-                              heartRate,
-                              dates
-                            )}
+                            data={createChartData("Heart Rate", heartRate, dates)}
+                            options={chartOptions("Heart Rate")}
                           />
                         </div>
                       )}
-
                       {respiratoryRate.length > 0 && (
                         <div className="mb-4">
                           <Line
-                            data={createChartData(
-                              "Respiratory Rate",
-                              respiratoryRate,
-                              dates
-                            )}
+                            data={createChartData("Respiratory Rate", respiratoryRate, dates)}
+                            options={chartOptions("Respiratory Rate")}
                           />
                         </div>
                       )}
-
                       {weight.length > 0 && (
                         <div className="mb-4">
                           <Line
                             data={createChartData("Weight", weight, dates)}
+                            options={chartOptions("Weight")}
                           />
                         </div>
                       )}

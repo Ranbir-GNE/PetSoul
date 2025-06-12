@@ -145,7 +145,7 @@ const contact = async (req, res) => {
     if (!pet) {
       return res.status(400).json({ message: "Pet Not Found" });
     }
-    const owner = await UserModel.findById(pet.ownerId);
+    const owner = await UserModel.findById(pet.ownerId).select("-password");
     if (!owner) {
       return res.status(400).json({ message: "Owner Not Found" });
     }

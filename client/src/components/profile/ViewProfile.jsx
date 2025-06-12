@@ -1,45 +1,41 @@
 import React, { useState, useEffect, useContext } from "react";
-import axios from "axios";
+import { useUserProfile } from "../../hooks/useUserProfileData";
 import { FaEdit, FaTrash, FaSave, FaTimes } from "react-icons/fa";
 import profile from "../../assets/profilePicture.jpg";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import userContext from "../../context/UserContext";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const ViewProfile = () => {
   const authContext = useContext(userContext);
   const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState({
-    firstName: "",
-    lastName: "",
-    address: "",
-    pincode: "",
-    profilePicture: "",
-  });
+  const navigate = useNavigate();
   const [profilePictureFile, setProfilePictureFile] = useState(null);
 
-  const fetchUser = async () => {
-    const token = localStorage.getItem("key");
-    if (!token) {
-      console.log("Token not found in local storage");
-      return;
-    }
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/users/token/${token}`,
-        { headers: { Authorization: token } }
-      );
-      setUserData(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const {
+    userData,
+    setUserData,
+    fetchUser,
+    updateUser,
+    deleteUser,
+    uploadImage,
+  } = useUserProfile();
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
 
   const toggleEdit = () => setIsEditing(!isEditing);
+  
+  if (!userData) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-gray-600">Loading user data...</p>
+      </div>
+    );
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -59,68 +55,31 @@ const ViewProfile = () => {
 
     if (profilePictureFile) {
       try {
-        const imageFormData = new FormData();
-        imageFormData.append("file", profilePictureFile);
-        imageFormData.append(
-          "upload_preset",
-          import.meta.env.VITE_UPLOAD_PRESET
-        );
-
-        const response = await axios.post(
-          `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUD_NAME}/upload`,
-          imageFormData
-        );
-
-        if (response && response.data.secure_url) {
-          imageUrl = response.data.secure_url;
-        } else {
-          console.error("Failed to upload image");
-          return;
-        }
+        imageUrl = await uploadImage(profilePictureFile);
       } catch (error) {
-        console.error("Error uploading image:", error);
+        toast.error("Error uploading image");
         return;
       }
     }
 
-    const token = localStorage.getItem("key");
-    if (!token) {
-      console.log("Token not found in local storage");
-      return;
-    }
-
     try {
       const updatedData = { ...userData, profilePicture: imageUrl };
-      const response = await axios.put(
-        `http://localhost:3000/api/users/${userData._id}`,
-        updatedData,
-        { headers: { Authorization: token } }
-      );
-
-      if (response && response.data) {
-        setUserData(response.data);
-        console.log("Profile updated successfully:", response.data);
-      } else {
-        console.error("Error updating profile");
-      }
+      await updateUser(updatedData);
+      toast.success("Profile updated successfully");
     } catch (error) {
-      console.error("Error updating user profile:", error.message);
+      toast.error("Failed to update user profile");
     } finally {
       setIsEditing(false);
     }
   };
 
   const handleDelete = async () => {
-    const token = localStorage.getItem("key");
-    if (!token) {
-      console.log("Token not found in local storage");
-      return;
-    }
     try {
-      await axios.delete(`http://localhost:3000/api/users/${userData._id}`);
-      console.log("User deleted successfully");
+      await deleteUser(userData._id);
+      toast.success("User deleted successfully");
+      navigate("/login");
     } catch (error) {
-      console.log("Error deleting user profile:", error.message);
+      toast.error("Failed to delete user profile");
     }
   };
 
@@ -142,9 +101,11 @@ const ViewProfile = () => {
           <div className="col-span-2 flex justify-center">
             <img
               src={userData.profilePicture || profile}
+              onError={(e) => (e.target.src = profile)}
               alt="User Profile"
               className="w-44 h-44 rounded-full shadow-md"
             />
+
           </div>
           <div>
             <p className="font-bold text-gray-600">Username</p>

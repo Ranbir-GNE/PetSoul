@@ -4,8 +4,11 @@ import { Input } from "../ui/input";
 import LoadingButton from "../dashboard/LoadingButton";
 import { toast } from "sonner";
 import useUserAndPetData from "../../hooks/useUserAndPetData";
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
 
 const vaccinationTypes = ["one-time", "annual", "bi-annual", "tri-annual"];
+
+
 const vaccinationNames = [
   "rabies",
   "dhpp",
@@ -52,7 +55,7 @@ const AddVaccinationForm = ({ onSubmit }) => {
     vaccinationType: "",
     vaccinationName: "",
     vaccinationDate: "",
-    VaccinationImmunity: "",
+    vaccinationImmunity: "",
     nextVaccinationDate: "",
     vaccineStatus: "",
   });
@@ -89,7 +92,7 @@ const AddVaccinationForm = ({ onSubmit }) => {
     }
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/vaccinations",
+        `${API_BASE}/api/vaccinations`,
         formData,
         {
           headers: { Authorization: token },
@@ -102,6 +105,8 @@ const AddVaccinationForm = ({ onSubmit }) => {
       }
     } catch (err) {
       console.error("Error adding vaccination:", err);
+      toast.error("Failed to add vaccination. Please try again.");
+
     } finally {
       setIsLoading(false);
     }
@@ -196,8 +201,8 @@ const AddVaccinationForm = ({ onSubmit }) => {
         </label>
         <Input
           type="number"
-          name="VaccinationImmunity"
-          value={formData.VaccinationImmunity}
+          name="vaccinationImmunity" // <-- FIXED
+          value={formData.vaccinationImmunity}
           onChange={handleChange}
           className="mt-1"
           required
@@ -207,6 +212,7 @@ const AddVaccinationForm = ({ onSubmit }) => {
       <LoadingButton
         type="submit"
         isLoading={isLoading}
+        disabled={isLoading}
         className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none"
       >
         Add Vaccination

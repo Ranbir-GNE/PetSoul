@@ -2,7 +2,55 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { Button } from "../ui/button";
-import useUserAndPetData from "../../hooks/useUserAndPetData"; // Adjust the import path as necessary
+import useUserAndPetData from "../../hooks/useUserAndPetData";
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
+
+
+// Subcomponents for modularity
+const VitalSigns = ({ vitalSigns }) => (
+  <div>
+    <h3 className="font-semibold">Vital Signs</h3>
+    <p>Temperature: {vitalSigns.temperature}</p>
+    <p>Heart Rate: {vitalSigns.heartRate}</p>
+    <p>Respiratory Rate: {vitalSigns.respiratoryRate}</p>
+    <p>Weight: {vitalSigns.weight}</p>
+    <p>Body Condition Score: {vitalSigns.bodyConditionScore}</p>
+    <p>Hydration Status: {vitalSigns.hydrationStatus}</p>
+  </div>
+);
+
+const PhysicalExam = ({ physicalExamination }) => (
+  <div>
+    <h3 className="font-semibold">Physical Examination</h3>
+    {Object.entries(physicalExamination).map(([key, value]) => (
+      <p key={key}>
+        {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
+      </p>
+    ))}
+  </div>
+);
+
+const AdditionalTests = ({ additionalTests }) => (
+  <div>
+    <h3 className="font-semibold">Additional Tests</h3>
+    {Object.entries(additionalTests).map(([key, value]) => (
+      <p key={key}>
+        {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
+      </p>
+    ))}
+  </div>
+);
+
+const LabTests = ({ laboratoryTests }) => (
+  <div>
+    <h3 className="font-semibold">Laboratory Tests</h3>
+    {Object.entries(laboratoryTests).map(([key, value]) => (
+      <p key={key}>
+        {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
+      </p>
+    ))}
+  </div>
+);
 
 const Lightbox = ({ report, onClose }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -15,39 +63,11 @@ const Lightbox = ({ report, onClose }) => (
       </div>
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h3 className="font-semibold">Vital Signs</h3>
-            <p>Temperature: {report.vitalSigns.temperature}</p>
-            <p>Heart Rate: {report.vitalSigns.heartRate}</p>
-            <p>Respiratory Rate: {report.vitalSigns.respiratoryRate}</p>
-            <p>Weight: {report.vitalSigns.weight}</p>
-            <p>Body Condition Score: {report.vitalSigns.bodyConditionScore}</p>
-            <p>Hydration Status: {report.vitalSigns.hydrationStatus}</p>
-          </div>
-
-          <div>
-            <h3 className="font-semibold">Physical Examination</h3>
-            {Object.entries(report.physicalExamination).map(([key, value]) => (
-              <p key={key}>
-                {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
-              </p>
-            ))}
-          </div>
+          <VitalSigns vitalSigns={report.vitalSigns} />
+          <PhysicalExam physicalExamination={report.physicalExamination} />
         </div>
-        <div>
-          <h3 className="font-semibold">Additional Tests</h3>
-          {Object.entries(report.additionalTests).map(([key, value]) => (
-            <p key={key}></p>
-          ))}
-        </div>
-        <div>
-          <h3 className="font-semibold">Laboratory Tests</h3>
-          {Object.entries(report.laboratoryTests).map(([key, value]) => (
-            <p key={key}>
-              {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
-            </p>
-          ))}
-        </div>
+        <AdditionalTests additionalTests={report.additionalTests} />
+        <LabTests laboratoryTests={report.laboratoryTests} />
       </div>
     </div>
   </div>
@@ -72,7 +92,7 @@ const ViewReports = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/pets/reports/${petId}`,
+        `${API_BASE}/api/pets/reports/${petId}`,
         { headers: { Authorization: token } }
       );
       if (response.data && response.data.reports) {
@@ -88,9 +108,11 @@ const ViewReports = () => {
   };
 
   const handlePetClick = (petId) => {
+    if (selectedPetId === petId) return; // Avoid refetching
     setSelectedPetId(petId);
     fetchPetReports(petId);
   };
+
 
   const handleReportClick = (report) => {
     setSelectedReport(report);
@@ -116,7 +138,8 @@ const ViewReports = () => {
             {pets.map((pet) => (
               <div
                 key={pet._id}
-                className="flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg cursor-pointer hover:shadow-md transition-shadow"
+                className={`flex flex-col items-center space-y-2 bg-gray-100 p-4 rounded-lg cursor-pointer hover:shadow-md transition-shadow ${selectedPetId === pet._id ? "bg-gray-200 p4 rounded-lg" : ""
+                  }`}
                 onClick={() => handlePetClick(pet._id)}
               >
                 <img
@@ -139,7 +162,7 @@ const ViewReports = () => {
       <div className="flex-1 p-6 bg-white rounded-lg shadow-md mt-6">
         <h2 className="text-2xl font-bold mb-4">Reports</h2>
         {isLoadingReports ? (
-          <p>Loading reports...</p>
+          <div className="text-gray-500 italic">Fetching reports...</div>
         ) : reports.length > 0 ? (
           <ul className="space-y-4">
             {reports.map((report) => (
@@ -158,8 +181,10 @@ const ViewReports = () => {
               </li>
             ))}
           </ul>
+        ) : selectedPetId ? (
+          <div className="text-gray-500 italic">No reports found for this pet.</div>
         ) : (
-          <p>Select a pet to view its reports.</p>
+          <div className="text-gray-500 italic">Select a pet to view reports.</div>
         )}
       </div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
 
 const useUserAndPetData = () => {
   const [userData, setUserData] = useState({});
@@ -17,7 +18,7 @@ const useUserAndPetData = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/users/token/${token}`,
+        `${API_BASE}/api/users/token/${token}`,
         { headers: { Authorization: token } }
       );
       if (response.data) {
@@ -36,7 +37,7 @@ const useUserAndPetData = () => {
     try {
       const token = localStorage.getItem("key");
       const response = await axios.get(
-        `http://localhost:3000/api/pets/owner/${userId}`,
+        `${API_BASE}/api/pets/owner/${userId}`,
         { headers: { Authorization: token } }
       );
       if (response.data) {

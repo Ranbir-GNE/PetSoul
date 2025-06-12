@@ -4,6 +4,8 @@ import { FaSearch, FaTimes, FaEdit, FaTrash } from "react-icons/fa";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import useUserAndPetData from "../../hooks/useUserAndPetData";
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
+
 
 const Lightbox = ({ vaccination, onClose, onEdit, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -59,14 +61,14 @@ const Lightbox = ({ vaccination, onClose, onEdit, onDelete }) => {
             >
               <option value="one-time">One Time</option>
               <option value="annual">Annual</option>
-              <option value="bu-annual">Bi Annual</option>
+              <option value="bi-annual">Bi Annual</option>
               <option value="tri-annual">Tri Annual</option>
             </select>
             <Input
               label="Vaccination Date"
               name="vaccinationDate"
               type="date"
-              value={editedVaccination.vaccinationDate.split("T")[0]}
+              value={new Date(editedVaccination.vaccinationDate).toISOString().split("T")[0]}
               onChange={handleInputChange}
             />
             <Input
@@ -156,7 +158,7 @@ const ViewVaccination = () => {
     }
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/vaccinations/${petId}`,
+        `${API_BASE}/api/vaccinations/${petId}`,
         { headers: { Authorization: token } }
       );
       if (response.data && response.data.vaccinations) {
@@ -185,17 +187,19 @@ const ViewVaccination = () => {
   };
 
   const editVaccination = async (updatedVaccination) => {
+    let toastId;
     try {
+      toastId = toast.loading("Saving...");
       const token = localStorage.getItem("key");
       await axios.put(
-        `http://localhost:3000/api/vaccinations/${updatedVaccination._id}`,
+        `${API_BASE}/api/vaccinations/${updatedVaccination._id}`,
         updatedVaccination,
         { headers: { Authorization: token } }
       );
-      // Refresh vaccinations
       fetchPetVaccinations(selectedPetId);
+      toast.success("Vaccination updated successfully.", { id: toastId });
     } catch (error) {
-      console.error("Error editing vaccination:", error.message);
+      toast.error("Failed to update vaccination.", { id: toastId });
     }
   };
 
@@ -203,7 +207,7 @@ const ViewVaccination = () => {
     const token = localStorage.getItem("key");
     try {
       await axios.delete(
-        `http://localhost:3000/api/vaccinations/${vaccinationId}`,
+        `${API_BASE}/api/vaccinations/${vaccinationId}`,
         { headers: { Authorization: token } }
       );
       // Refresh vaccinations
@@ -287,3 +291,4 @@ const ViewVaccination = () => {
 };
 
 export default ViewVaccination;
+

@@ -1,12 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import { Input } from "../ui/input";
 import LoadingButton from "../dashboard/LoadingButton";
 import { toast } from "sonner";
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
+const UPLOAD_PRESET = import.meta.env.VITE_UPLOAD_PRESET || "default_preset";
+const CLOUD_NAME = import.meta.env.VITE_CLOUD_NAME || "default_cloud";
+
+
 
 const speciesOptions = ["Dog", "Cat", "Bird", "Fish", "Other"];
 
 const AddPetForm = ({ onPetAdded }) => {
+
   const [formData, setFormData] = useState({
     name: "",
     species: "",
@@ -14,6 +20,13 @@ const AddPetForm = ({ onPetAdded }) => {
     profilePicture: null,
     age: "",
   });
+
+  const fileInputRef = useRef();
+
+
+  const isFormValid =
+    formData.name && formData.species && formData.breed && formData.age;
+
 
   const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState();
@@ -26,28 +39,26 @@ const AddPetForm = ({ onPetAdded }) => {
     });
   };
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     const token = localStorage.getItem("key");
-    if (!token) {
-      console.error("Token not found in local storage");
-      return;
-    }
+    if (!token) return;
+
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/users/token/${token}`,
-        { headers: { Authorization: token } }
-      );
-      if (response.data) {
-        setUserData(response.data);
+      const response = await axios.get(`${API_BASE}/api/users/token/${token}`, {
+        headers: { Authorization: token },
+      });
+      if (response.data && response.data.data) setUserData(response.data.data); 
+      else {
+        toast.error("Failed to fetch user data.");
       }
     } catch (error) {
       console.error("Error fetching user data:", error.message);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,15 +75,21 @@ const AddPetForm = ({ onPetAdded }) => {
       if (formData.profilePicture) {
         const imageFormData = new FormData();
         imageFormData.append("file", formData.profilePicture);
-        imageFormData.append(
-          "upload_preset",
-          import.meta.env.VITE_UPLOAD_PRESET
-        );
+        imageFormData.append("upload_preset", UPLOAD_PRESET);
+
+        if (
+          formData.profilePicture &&
+          !["image/jpeg", "image/png", "image/jpg"].includes(
+            formData.profilePicture.type
+          )
+        ) {
+          toast.error("Only JPEG, JPG, or PNG files are allowed.");
+          setIsLoading(false);
+          return;
+        }
 
         const response = await axios.post(
-          `https://api.cloudinary.com/v1_1/${
-            import.meta.env.VITE_CLOUD_NAME
-          }/upload`,
+          `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`,
           imageFormData
         );
         if (!response) {
@@ -85,7 +102,7 @@ const AddPetForm = ({ onPetAdded }) => {
       }
 
       const response = await axios.post(
-        "http://localhost:3000/api/pets/",
+        `${API_BASE}/api/pets`,
         { ...formData, profilePicture: imageUrl, ownerId: userData._id },
         {
           headers: { Authorization: token },
@@ -100,6 +117,9 @@ const AddPetForm = ({ onPetAdded }) => {
         profilePicture: null,
         age: "",
       });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
     } catch (error) {
       console.error("Error adding pet:", error);
       toast.error("Failed to add pet. Please try again.");
@@ -107,6 +127,7 @@ const AddPetForm = ({ onPetAdded }) => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <form
@@ -166,6 +187,7 @@ const AddPetForm = ({ onPetAdded }) => {
           Profile Picture
         </label>
         <input
+          ref={fileInputRef}
           type="file"
           name="profilePicture"
           onChange={handleChange}
@@ -190,10 +212,12 @@ const AddPetForm = ({ onPetAdded }) => {
       <LoadingButton
         type="submit"
         isLoading={isLoading}
-        className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none"
+        disabled={!isFormValid}
+        className="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Add Pet
       </LoadingButton>
+
     </form>
   );
 };

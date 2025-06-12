@@ -4,9 +4,11 @@ import defaultProfile from "../../assets/profilePicture.jpg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { FaBars } from "react-icons/fa";
+
 const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
   const [isLogin, setIsLogin] = useState(false);
   const [profilePicture, setProfilePicture] = useState(defaultProfile);
   const navigate = useNavigate();
@@ -16,51 +18,54 @@ const Navbar = () => {
     if (!token) return;
 
     try {
-      const { data } = await axios.get(`${API_BASE}/api/users/token/${token}`);
+      const { data } = await axios.get(`${API_BASE}/api/users/token/${token}`, {
+        headers: { Authorization: `${token}` },
+      });
       setProfilePicture(data.profilePicture || defaultProfile);
       setIsLogin(true);
     } catch (error) {
       console.error("Error fetching user data:", error.message);
-      localStorage.removeItem("key");
       setIsLogin(false);
       toast.error("Session expired. Please log in again.");
       navigate("/login");
+      localStorage.removeItem("key");
     }
   }, [navigate]);
-
 
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
 
-
-  const handleLogin = () => {
-    navigate("/login");
-  };
-
   return (
-    <div className="bg-gray-900 shadow-md">
-      <div className="container mx-auto flex items-center justify-between py-4 px-6">
-        {/* Logo */}
-        <div className="flex items-center">
+    <div className="bg-gray-900 text-white shadow-md w-full">
+      <div className="flex justify-between items-center px-4 py-2">
+        {/* Left: Hamburger and Logo */}
+        <div className="flex items-center space-x-4">
+          <button
+            className="text-white text-xl md:hidden"
+            onClick={onMenuClick}
+          >
+            <FaBars />
+          </button>
           <img src={logo} alt="logo" className="h-10 w-auto" />
         </div>
 
-        <ul className="flex items-center space-x-6 text-gray-300">
+        {/* Right: Nav links & profile */}
+        <ul className="flex items-center space-x-6">
           <li>
-            <button className="hover:text-white transition-colors">
+            <button className="hover:text-blue-300 transition-colors">
               Blogs
             </button>
           </li>
           <li>
-            <button className="hover:text-white transition-colors">
+            <button className="hover:text-blue-300 transition-colors">
               Community
             </button>
           </li>
           {isLogin ? (
             <li>
               <div className="flex items-center space-x-2">
-                <span className="hidden sm:block text-gray-400 text-sm">
+                <span className="hidden sm:block text-sm text-gray-300">
                   Welcome!
                 </span>
                 <img
@@ -106,7 +111,6 @@ const Navbar = () => {
                 </button>
               </div>
             </li>
-
           )}
         </ul>
       </div>

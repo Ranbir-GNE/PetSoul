@@ -4,8 +4,10 @@ import { Button } from "../ui/button";
 import pet1 from "../../assets/pet1.jpg"; // Default pet image
 import { toast } from "sonner";
 import useUserAndPetData from "../../hooks/useUserAndPetData"; // Adjust the import path as needed
+const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
 
-const ViewRecord = () => {
+
+const ViewPetProfile = () => {
   const { pets, isLoading, error, refetchPets } = useUserAndPetData(); // Assuming refetchPets can re-fetch the pets data
   const [selectedPet, setSelectedPet] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -19,7 +21,7 @@ const ViewRecord = () => {
     }
     try {
       await axios.put(
-        `http://localhost:3000/api/pets/${editedPet._id}`,
+        `${API_BASE}/api/pets/${editedPet._id}`,
         editedPet,
         { headers: { Authorization: token } }
       );
@@ -39,7 +41,7 @@ const ViewRecord = () => {
       return;
     }
     try {
-      await axios.delete(`http://localhost:3000/api/pets/${petId}`, {
+      await axios.delete(`${API_BASE}/api/pets/${petId}`, {
         headers: { Authorization: token },
       });
       toast.success("Pet deleted successfully");
@@ -65,7 +67,7 @@ const ViewRecord = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 ">
       <h2 className="text-2xl font-bold mb-4">Pets</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {pets.map((pet) => (
@@ -79,7 +81,7 @@ const ViewRecord = () => {
           >
             <div className="flex justify-center mb-4">
               <img
-                src={pet.profilePicture || pet1}
+                src={pet?.profilePicture || pet1}
                 alt="Pet Profile Picture"
                 className="w-44 h-44 rounded-full"
               />
@@ -95,7 +97,7 @@ const ViewRecord = () => {
       </div>
 
       {selectedPet && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex itemsnp-center justify-center z-50">
           <div className="bg-white p-6 w-full max-w-lg rounded-lg shadow-lg relative">
             <Button
               onClick={() => {
@@ -112,7 +114,7 @@ const ViewRecord = () => {
                 <input
                   type="text"
                   name="name"
-                  value={editedPet.name}
+                  value={editedPet?.name || ""}
                   onChange={handleEditChange}
                   className="w-full p-2 border rounded"
                   placeholder="Pet Name"
@@ -120,7 +122,7 @@ const ViewRecord = () => {
                 <input
                   type="number"
                   name="age"
-                  value={editedPet.age}
+                  value={editedPet?.age || ""}
                   onChange={handleEditChange}
                   className="w-full p-2 border rounded"
                   placeholder="Pet Age"
@@ -128,14 +130,14 @@ const ViewRecord = () => {
                 <input
                   type="text"
                   name="breed"
-                  value={editedPet.breed}
+                  value={editedPet?.breed || ""}
                   onChange={handleEditChange}
                   className="w-full p-2 border rounded"
                   placeholder="Pet Breed"
                 />
                 <select
                   name="species"
-                  value={editedPet.species}
+                  value={editedPet?.species || ""}
                   onChange={handleEditChange}
                   className="w-full p-2 border rounded"
                 >
@@ -196,4 +198,4 @@ const ViewRecord = () => {
   );
 };
 
-export default ViewRecord;
+export default ViewPetProfile;
