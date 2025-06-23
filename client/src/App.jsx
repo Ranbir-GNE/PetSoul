@@ -7,7 +7,7 @@ import userPetContext from "./context/UserPetContext";
 import userContext from "./context/UserContext";
 import LoadingPage from "./pages/LoadingPage";
 
-const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
+const API_BASE = import.meta.env. VITE_APP_API_BASE ;
 
 const LoginPage = lazy(() => import("./components/auth/LoginPage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -62,7 +62,7 @@ function App() {
         })
         .catch((err) => {
           console.error("Failed to auto-login:", err);
-          localStorage.removeItem("key"); // Clear invalid token
+          localStorage.removeItem("key"); 
         })
         .finally(() => {
           setIsAuthLoading(false);

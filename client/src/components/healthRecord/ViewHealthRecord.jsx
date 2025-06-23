@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import useUserAndPetData from "../../hooks/useUserAndPetData";
 import { toast } from "sonner";
 import pet1 from "../../assets/pet1.jpg";
-const API_BASE = import.meta.env.REACT_APP_API_BASE || "http://localhost:3000";
+const API_BASE = import.meta.env. VITE_APP_API_BASE  ;
 
 // Helper function to safely get nested values
 const safeGet = (obj, path, defaultValue = "N/A") => {
@@ -171,11 +171,11 @@ const ViewRecord = () => {
       {/* Pets Grid */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold mb-6">Your Pets</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {pets.map((pet) => (
             <div
               key={pet._id}
-              className="flex flex-col items-center space-y-3 bg-gray-50 p-4 rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:bg-gray-100"
+              className="flex flex-col items-center space-y-3 bg-gray-50 p-2 rounded-lg cursor-pointer hover:shadow-lg transition-all duration-200 hover:bg-gray-100"
               onClick={() => fetchPetRecord(pet._id)}
             >
               <img
